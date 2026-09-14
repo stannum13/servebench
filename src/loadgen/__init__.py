@@ -1,0 +1,2 @@
+"""Async inference load generator."""
+
