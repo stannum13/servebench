@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from fastapi.testclient import TestClient
 
 from router.app import create_app
+from router.backend import parse_vllm_metrics
 from router.state import RouterState
 from servebench.config import BenchConfig
 
@@ -54,3 +55,13 @@ def test_health_and_metrics_expose_queue_and_decisions() -> None:
     metrics = client.get("/metrics").text
     assert "servebench_router_queue_depth" in metrics
     assert 'servebench_admission_decisions_total{action="admit"}' in metrics
+
+
+def test_vllm_metrics_parser_extracts_cache_and_preemptions() -> None:
+    parsed = parse_vllm_metrics(
+        'vllm:gpu_cache_usage_perc{model_name="x"} 0.83\n'
+        "vllm:num_preemptions_total 7\n"
+        "vllm:prefix_cache_hits_total 30\n"
+        "vllm:prefix_cache_queries_total 40\n"
+    )
+    assert parsed == {"kv_usage": 0.83, "preemptions": 7, "prefix_cache_hit_rate": 0.75}

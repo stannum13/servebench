@@ -8,9 +8,8 @@ services:
     deploy:
       resources:
         reservations:
-          devices: []
+          devices: !reset []
     healthcheck:
       start_period: 1s
   dcgm-exporter:
     profiles: [gpu]
-

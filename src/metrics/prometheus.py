@@ -14,6 +14,18 @@ class RouterMetrics:
             "servebench_worker_kv_cache_usage_ratio", "Worker KV cache utilization", ["worker"],
             registry=self.registry,
         )
+        self.prefix_hits = Gauge(
+            "servebench_worker_prefix_cache_hit_ratio",
+            "Worker prefix cache hit ratio",
+            ["worker"],
+            registry=self.registry,
+        )
+        self.preemptions = Gauge(
+            "servebench_worker_preemptions_total",
+            "Worker-reported cumulative preemptions",
+            ["worker"],
+            registry=self.registry,
+        )
         self.decisions = Counter(
             "servebench_admission_decisions_total", "Admission decisions", ["action"],
             registry=self.registry,
@@ -21,4 +33,3 @@ class RouterMetrics:
 
     def render(self) -> bytes:
         return generate_latest(self.registry)
-

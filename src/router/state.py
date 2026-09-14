@@ -14,6 +14,8 @@ class WorkerRuntime:
     url: str
     queue_depth: int = 0
     kv_usage: float = 0.0
+    prefix_cache_hit_rate: float | None = None
+    preemptions: int = 0
 
 
 class RouterState:
@@ -32,8 +34,19 @@ class RouterState:
             ]
         )
 
-    def update_metrics(self, worker: str, *, kv_usage: float) -> None:
-        self.workers[worker].kv_usage = kv_usage
+    def update_metrics(
+        self,
+        worker: str,
+        *,
+        kv_usage: float,
+        prefix_cache_hit_rate: float | None = None,
+        preemptions: int | None = None,
+    ) -> None:
+        runtime = self.workers[worker]
+        runtime.kv_usage = kv_usage
+        runtime.prefix_cache_hit_rate = prefix_cache_hit_rate
+        if preemptions is not None:
+            runtime.preemptions = preemptions
 
     async def acquire(self, worker: str) -> None:
         async with self._lock:

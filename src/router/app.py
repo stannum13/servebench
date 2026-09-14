@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from typing import Protocol
 
 from fastapi import FastAPI, Request
@@ -48,10 +48,32 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         del app
-        yield
-        close = getattr(transport, "close", None)
-        if close is not None:
-            await close()
+        async def sample_metrics() -> None:
+            fetch = getattr(transport, "fetch_metrics", None)
+            while fetch is not None:
+                for worker in router_state.workers:
+                    try:
+                        values = await fetch(worker)
+                        router_state.update_metrics(
+                            worker,
+                            kv_usage=float(values.get("kv_usage", 0)),
+                            prefix_cache_hit_rate=values.get("prefix_cache_hit_rate"),
+                            preemptions=int(values.get("preemptions", 0)),
+                        )
+                    except Exception:  # metric loss must not stop inference
+                        continue
+                await asyncio.sleep(1)
+
+        sampler = asyncio.create_task(sample_metrics())
+        try:
+            yield
+        finally:
+            sampler.cancel()
+            with suppress(asyncio.CancelledError):
+                await sampler
+            close = getattr(transport, "close", None)
+            if close is not None:
+                await close()
 
     app = FastAPI(title="servebench router", lifespan=lifespan)
     app.state.router = router_state
@@ -70,6 +92,9 @@ def create_app(
         for worker in router_state.workers.values():
             instruments.queue.labels(worker.name).set(worker.queue_depth)
             instruments.kv.labels(worker.name).set(worker.kv_usage)
+            if worker.prefix_cache_hit_rate is not None:
+                instruments.prefix_hits.labels(worker.name).set(worker.prefix_cache_hit_rate)
+            instruments.preemptions.labels(worker.name).set(worker.preemptions)
         return Response(instruments.render(), media_type="text/plain; version=0.0.4")
 
     async def proxy(request: Request) -> Response:

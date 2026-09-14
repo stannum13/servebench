@@ -104,6 +104,8 @@ async def run_load(
     own_client = client is None
     active_client = client or httpx.AsyncClient()
     semaphore = asyncio.Semaphore(options.concurrency)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("", encoding="utf-8")
     writer = JsonlWriter(output_path)
     scheduled_at = time.monotonic()
     try:
@@ -118,4 +120,3 @@ async def run_load(
     finally:
         if own_client:
             await active_client.aclose()
-
