@@ -1,0 +1,8 @@
+name: fifo-vs-slo
+workload: mixed
+seed: 20260914
+repeats: 3
+policies: [fifo, slo]
+objective: p95_ttft_ms
+throughput_floor_ratio: 0.95
+max_policy_iterations: 3

@@ -1,0 +1,20 @@
+name: baseline-saturation
+workload: mixed
+seed: 20260914
+repeats: 3
+concurrency:
+  coarse: [1, 2, 4, 8, 16, 32, 64, 128]
+  refine_transition: true
+engine_baseline:
+  max_num_batched_tokens: 8192
+  max_num_seqs: 256
+  prefix_caching: true
+  chunked_prefill: true
+  dtype: bfloat16
+independent_sweeps:
+  max_num_batched_tokens: [4096, 16384]
+  max_num_seqs: [128, 512]
+  prefix_caching: [false, true]
+  chunked_prefill: [false, true]
+  dtype: [bfloat16, awq]
+
