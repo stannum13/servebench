@@ -2,6 +2,8 @@ name: baseline-saturation
 workload: mixed
 seed: 20260914
 repeats: 3
+requests: 100
+policy: fifo
 concurrency:
   coarse: [1, 2, 4, 8, 16, 32, 64, 128]
   refine_transition: true
@@ -17,4 +19,3 @@ independent_sweeps:
   prefix_caching: [false, true]
   chunked_prefill: [false, true]
   dtype: [bfloat16, awq]
-

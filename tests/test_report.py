@@ -29,9 +29,23 @@ def test_report_generates_three_graphs_and_evidence_tables(tmp_path: Path) -> No
     text = report.read_text()
     assert "Latency / throughput / cost" in text
     assert "repeated measurements" in text
+    assert "95% CI" in text
+    assert "TTFT improved within throughput constraint" in text
 
 
 def test_report_refuses_optimization_claim_with_too_few_repeats(tmp_path: Path) -> None:
     report = tmp_path / "REPORT.md"
     generate_report(rows(2), report, tmp_path / "figures")
     assert "insufficient repeated measurements" in report.read_text().lower()
+
+
+def test_report_accepts_native_runner_summary_schema(tmp_path: Path) -> None:
+    native = [{
+        "policy": "fifo", "repeat": repeat, "concurrency": 2,
+        "p95_ttft_ms": 120, "requests_per_second": 4.0,
+        "queue_time_ms": {"p95": 30}, "gpu_utilization_peak": 88,
+        "kv_cache_peak": 0.7, "gpu_power_average_watts": 240,
+    } for repeat in range(3)]
+    report = tmp_path / "REPORT.md"
+    generate_report(native, report, tmp_path / "figures")
+    assert "240.00" in report.read_text()

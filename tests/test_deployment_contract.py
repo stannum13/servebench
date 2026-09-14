@@ -16,7 +16,7 @@ def test_compose_contains_required_services_and_gpu_contract() -> None:
 
 def test_makefile_exposes_operator_commands() -> None:
     text = Path("Makefile").read_text()
-    for target in ("serve", "smoke", "loadtest", "sweep", "report"):
+    for target in ("serve", "smoke", "loadtest", "sweep", "report", "site"):
         assert f"{target}:" in text
     smoke_recipe = text.split("smoke:", 1)[1].split("\n\n", 1)[0]
     assert "run --rm --build experiment-runner" in smoke_recipe

@@ -21,6 +21,8 @@ def create_app(token_delay: float = 0.001) -> FastAPI:
     @app.get("/metrics")
     async def metrics() -> PlainTextResponse:
         return PlainTextResponse(
+            "# TYPE vllm:kv_cache_usage_perc gauge\n"
+            "vllm:kv_cache_usage_perc 0\n"
             "# TYPE vllm:gpu_cache_usage_perc gauge\n"
             "vllm:gpu_cache_usage_perc 0\n"
             "# TYPE vllm:num_preemptions_total counter\n"

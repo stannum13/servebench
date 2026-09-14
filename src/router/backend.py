@@ -17,12 +17,18 @@ def _metric(text: str, name: str) -> float | None:
 
 def parse_vllm_metrics(text: str) -> dict[str, float | int]:
     result: dict[str, float | int] = {}
-    if (kv := _metric(text, "vllm:gpu_cache_usage_perc")) is not None:
+    kv = _metric(text, "vllm:kv_cache_usage_perc")
+    kv = kv if kv is not None else _metric(text, "vllm:gpu_cache_usage_perc")
+    if kv is not None:
         result["kv_usage"] = kv
-    if (preemptions := _metric(text, "vllm:num_preemptions_total")) is not None:
+    preemptions = _metric(text, "vllm:num_preemptions_total")
+    preemptions = preemptions if preemptions is not None else _metric(text, "vllm:num_preemptions")
+    if preemptions is not None:
         result["preemptions"] = int(preemptions)
     hits = _metric(text, "vllm:prefix_cache_hits_total")
+    hits = hits if hits is not None else _metric(text, "vllm:prefix_cache_hits")
     queries = _metric(text, "vllm:prefix_cache_queries_total")
+    queries = queries if queries is not None else _metric(text, "vllm:prefix_cache_queries")
     if hits is not None and queries:
         result["prefix_cache_hit_rate"] = hits / queries
     return result

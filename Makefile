@@ -1,4 +1,4 @@
-.PHONY: serve smoke loadtest sweep report test
+.PHONY: serve smoke loadtest sweep report site test
 
 serve:
 	docker compose up --build
@@ -11,7 +11,7 @@ loadtest:
 	uv run servebench-loadgen --url $${ROUTER_URL:-http://localhost:8080} --workload mixed --requests $${REQUESTS:-100} --concurrency $${CONCURRENCY:-8} --output results/latest/requests.jsonl
 
 sweep:
-	uv run servebench-experiment results/*/summary.json --output results/experiment-manifest.json
+	uv run servebench-experiment --config experiments/baseline.yaml --url $${ROUTER_URL:-http://localhost:8080} --prometheus-url $${PROMETHEUS_URL:-http://localhost:9090}
 
 report:
 	@if test -f results/report-input.json; then \
@@ -19,6 +19,9 @@ report:
 	else \
 		echo "No results/report-input.json; retaining evidence-pending REPORT.md"; \
 	fi
+
+site:
+	docker compose up --build web
 
 test:
 	uv run --extra dev pytest -q

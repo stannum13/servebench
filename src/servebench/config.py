@@ -23,6 +23,7 @@ class BackendConfig(StrictModel):
 
 class RouterConfig(StrictModel):
     policy: Literal["fifo", "slo"] = "fifo"
+    allow_policy_override: bool = False
     ttft_slo_ms: int = Field(default=1000, gt=0)
     max_delay_ms: int = Field(default=250, ge=0)
     queue_limit: int = Field(default=128, gt=0)
@@ -92,6 +93,9 @@ def load_config(path: Path | str) -> BenchConfig:
         ]
     if policy := os.getenv("ROUTER_POLICY"):
         raw.setdefault("router", {})["policy"] = policy
+    if override := os.getenv("ALLOW_POLICY_OVERRIDE"):
+        enabled = override.lower() in {"1", "true", "yes"}
+        raw.setdefault("router", {})["allow_policy_override"] = enabled
     if seed := os.getenv("SERVEBENCH_SEED"):
         raw.setdefault("workloads", {})["seed"] = int(seed)
 

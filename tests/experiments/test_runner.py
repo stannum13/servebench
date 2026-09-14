@@ -2,7 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from experiments.runner import compare_policies, validate_repeats
+from experiments.runner import (
+    build_run_specs,
+    compare_policies,
+    detect_saturation,
+    validate_repeats,
+)
 from experiments.state import append_state
 
 
@@ -30,3 +35,36 @@ def test_state_ledger_records_hypothesis_and_decision(tmp_path: Path) -> None:
     )
     text = path.read_text()
     assert "queue" in text and "delay long prompts" in text and "keep" in text
+
+
+def test_baseline_specs_repeat_every_concurrency_with_distinct_seeds() -> None:
+    specs = build_run_specs(
+        {"name": "baseline", "workload": "mixed", "seed": 10, "repeats": 3,
+         "requests": 50, "policy": "fifo", "concurrency": {"coarse": [1, 4]}}
+    )
+    assert len(specs) == 6
+    assert {(spec.concurrency, spec.repeat) for spec in specs} == {
+        (1, 0), (1, 1), (1, 2), (4, 0), (4, 1), (4, 2)
+    }
+    assert len({spec.seed for spec in specs}) == 3
+
+
+def test_scheduler_specs_cross_policies_but_not_engine_settings() -> None:
+    specs = build_run_specs({
+        "name": "scheduler", "workload": "mixed", "seed": 1, "repeats": 3,
+        "requests": 50, "policies": ["fifo", "slo"], "concurrency": {"coarse": [8]},
+    })
+    assert len(specs) == 6
+    assert {spec.policy for spec in specs} == {"fifo", "slo"}
+
+
+def test_saturation_detects_throughput_plateau_with_ttft_growth() -> None:
+    rows = [
+        {"concurrency": 1, "requests_per_second": 2, "p95_ttft_ms": 100},
+        {"concurrency": 2, "requests_per_second": 3.8, "p95_ttft_ms": 110},
+        {"concurrency": 4, "requests_per_second": 4.0, "p95_ttft_ms": 240},
+        {"concurrency": 8, "requests_per_second": 4.1, "p95_ttft_ms": 500},
+    ]
+    transition = detect_saturation(rows)
+    assert transition.saturation_concurrency == 4
+    assert transition.refinement_concurrency == 3

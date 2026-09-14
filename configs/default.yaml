@@ -5,6 +5,7 @@ backend:
   request_timeout_seconds: 300
 router:
   policy: fifo
+  allow_policy_override: false
   ttft_slo_ms: 1000
   max_delay_ms: 250
   queue_limit: 128
@@ -24,4 +25,3 @@ experiments:
   warmup_requests: 8
   throughput_floor_ratio: 0.95
   confidence_level: 0.95
-

@@ -47,6 +47,18 @@ def test_slo_returns_429_when_kv_is_exhausted() -> None:
     assert "retry-after" in response.headers
 
 
+def test_benchmark_header_selects_slo_against_fifo_default() -> None:
+    config = BenchConfig.model_validate({"router": {"allow_policy_override": True}})
+    state = RouterState(["http://worker-0:8000"])
+    state.update_metrics("worker-0", kv_usage=0.99)
+    response = TestClient(create_app(config, backend=FakeBackend(), state=state)).post(
+        "/v1/completions",
+        json={"prompt": "hello"},
+        headers={"X-Servebench-Policy": "slo"},
+    )
+    assert response.status_code == 429
+
+
 def test_health_and_metrics_expose_queue_and_decisions() -> None:
     client = TestClient(create_app(BenchConfig(), backend=FakeBackend()))
     assert client.get("/healthz").json() == {"status": "ok"}

@@ -53,6 +53,7 @@ make smoke       # mock backend and a small end-to-end load run
 make loadtest    # mixed workload against ROUTER_URL
 make sweep       # assemble transition-focused run summaries
 make report      # regenerate REPORT.md and figures
+make site        # serve the read-only results site on port 8081
 make test        # unit and integration tests
 ```
 
@@ -95,4 +96,3 @@ storage and linked from the report. `BENCH_STATE.md` is the append-only hypothes
 Grafana is available on port 3000, Prometheus on 9090, the router on 8080, and vLLM on 8000. The
 generated figures and `REPORT.md` are static deployable artifacts suitable for publishing on
 `www.shivanknigam.com`; a themed presentation layer can consume the same result schema later.
-

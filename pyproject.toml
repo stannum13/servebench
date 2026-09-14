@@ -33,7 +33,7 @@ servebench-experiment = "experiments.runner:main"
 servebench-report = "servebench.report:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/servebench", "src/router", "src/loadgen", "src/metrics", "src/experiments", "src/mock_backend"]
+packages = ["src/servebench", "src/router", "src/loadgen", "src/metrics", "src/experiments", "src/mock_backend", "src/webapp"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

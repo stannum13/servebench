@@ -45,3 +45,16 @@ async def test_concurrency_is_bounded(tmp_path: Path) -> None:
         )
     assert maximum == 2
     assert all(item.status == "error" for item in result)
+
+
+async def test_open_loop_offsets_are_preserved_in_measurements(tmp_path: Path) -> None:
+    transport = httpx.ASGITransport(app=create_app(token_delay=0))
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        result = await run_load(
+            WorkloadGenerator().generate("short", 2, 5),
+            LoadOptions(run_id="run", url="http://test", policy="fifo", concurrency=2),
+            tmp_path / "open-loop.jsonl",
+            client=client,
+            arrival_offsets=[0.0, 0.02],
+        )
+    assert round(result[1].scheduled_at - result[0].scheduled_at, 2) == 0.02

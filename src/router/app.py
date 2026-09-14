@@ -42,7 +42,7 @@ def create_app(
 ) -> FastAPI:
     router_state = state or RouterState(config.backend.urls)
     transport = backend or BackendPool(router_state, config.backend.request_timeout_seconds)
-    policy = SloPolicy(config.router) if config.router.policy == "slo" else FifoPolicy()
+    policies = {"fifo": FifoPolicy(), "slo": SloPolicy(config.router)}
     instruments = RouterMetrics()
 
     @asynccontextmanager
@@ -99,6 +99,12 @@ def create_app(
 
     async def proxy(request: Request) -> Response:
         body: dict[str, object] = await request.json()
+        policy_name = config.router.policy
+        if config.router.allow_policy_override:
+            policy_name = request.headers.get("X-Servebench-Policy", policy_name)
+        policy = policies.get(policy_name)
+        if policy is None:
+            return JSONResponse({"error": {"message": "unknown policy"}}, status_code=400)
         decision = policy.decide(RequestFeatures(_prompt_tokens(body)), router_state.snapshot())
         instruments.decisions.labels(decision.action).inc()
         if decision.action == "reject" or decision.worker is None:

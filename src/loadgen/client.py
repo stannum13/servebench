@@ -44,6 +44,7 @@ async def _request(
                 async with client.stream(
                     "POST",
                     options.url.rstrip("/") + "/v1/completions",
+                    headers={"X-Servebench-Policy": options.policy},
                     json={
                         "model": options.model,
                         "prompt": spec.prompt,
@@ -98,6 +99,7 @@ async def run_load(
     output_path: Path,
     *,
     client: httpx.AsyncClient | None = None,
+    arrival_offsets: list[float] | None = None,
 ) -> list[RequestMeasurement]:
     if options.concurrency < 1:
         raise ValueError("concurrency must be positive")
@@ -107,11 +109,20 @@ async def run_load(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("", encoding="utf-8")
     writer = JsonlWriter(output_path)
-    scheduled_at = time.monotonic()
+    offsets = arrival_offsets or [0.0] * len(requests)
+    if len(offsets) != len(requests) or any(value < 0 for value in offsets):
+        raise ValueError("arrival_offsets must contain one non-negative value per request")
+    run_started = time.monotonic()
+
+    async def scheduled_request(spec: RequestSpec, offset: float) -> RequestMeasurement:
+        scheduled_at = run_started + offset
+        await asyncio.sleep(max(0, scheduled_at - time.monotonic()))
+        return await _request(spec, options, active_client, semaphore, scheduled_at)
+
     try:
         tasks = [
-            asyncio.create_task(_request(spec, options, active_client, semaphore, scheduled_at))
-            for spec in requests
+            asyncio.create_task(scheduled_request(spec, offset))
+            for spec, offset in zip(requests, offsets, strict=True)
         ]
         results = await asyncio.gather(*tasks)
         for result in results:
