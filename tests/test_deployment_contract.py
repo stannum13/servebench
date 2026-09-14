@@ -1,0 +1,26 @@
+from pathlib import Path
+
+import yaml
+
+
+def test_compose_contains_required_services_and_gpu_contract() -> None:
+    compose = yaml.safe_load(Path("docker-compose.yml").read_text())
+    services = compose["services"]
+    required = {"router", "vllm", "prometheus", "grafana", "dcgm-exporter", "experiment-runner"}
+    assert required <= set(services)
+    devices = services["vllm"]["deploy"]["resources"]["reservations"]["devices"]
+    assert devices[0]["capabilities"] == ["gpu"]
+    assert "healthcheck" in services["router"] and "healthcheck" in services["vllm"]
+    assert any("results" in volume for volume in services["experiment-runner"]["volumes"])
+
+
+def test_makefile_exposes_operator_commands() -> None:
+    text = Path("Makefile").read_text()
+    for target in ("serve", "smoke", "loadtest", "sweep", "report"):
+        assert f"{target}:" in text
+
+
+def test_prometheus_scrapes_router_vllm_and_dcgm() -> None:
+    config = yaml.safe_load(Path("configs/prometheus.yml").read_text())
+    jobs = {item["job_name"] for item in config["scrape_configs"]}
+    assert {"router", "vllm", "dcgm"} <= jobs

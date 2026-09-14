@@ -1,0 +1,16 @@
+services:
+  vllm:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: servebench-mock
+    command: ["uvicorn", "mock_backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    deploy:
+      resources:
+        reservations:
+          devices: []
+    healthcheck:
+      start_period: 1s
+  dcgm-exporter:
+    profiles: [gpu]
+
