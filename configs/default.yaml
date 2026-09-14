@@ -1,0 +1,27 @@
+model: Qwen/Qwen2.5-7B-Instruct
+backend:
+  urls:
+    - http://vllm:8000
+  request_timeout_seconds: 300
+router:
+  policy: fifo
+  ttft_slo_ms: 1000
+  max_delay_ms: 250
+  queue_limit: 128
+  prompt_length_cutoff: 2048
+  kv_soft_limit: 0.80
+  kv_hard_limit: 0.95
+workloads:
+  seed: 20260914
+  request_timeout_seconds: 300
+  mixed_weights:
+    short: 0.40
+    long-prefill: 0.20
+    shared-prefix: 0.20
+    bursty: 0.20
+experiments:
+  repeats: 3
+  warmup_requests: 8
+  throughput_floor_ratio: 0.95
+  confidence_level: 0.95
+

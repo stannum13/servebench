@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+.DS_Store
+
+# Keep result directory structure, but avoid accidental large benchmark commits.
+results/*
+!results/.gitkeep
+figures/*.png
+
