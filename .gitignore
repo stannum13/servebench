@@ -8,5 +8,8 @@ __pycache__/
 # Keep result directory structure, but avoid accidental large benchmark commits.
 results/*
 !results/.gitkeep
-figures/*.png
-
+!results/report-input.json
+!results/mock-saturation/
+!results/mock-saturation/**
+!results/mock-scheduler/
+!results/mock-scheduler/**

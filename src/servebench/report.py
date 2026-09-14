@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import os
 from pathlib import Path
 
 import matplotlib
@@ -45,7 +47,12 @@ def _plot(frame: pd.DataFrame, x: str, ys: list[str], path: Path, title: str) ->
     plt.close(figure)
 
 
-def generate_report(rows: list[dict[str, object]], report: Path, figures: Path) -> None:
+def generate_report(
+    rows: list[dict[str, object]],
+    report: Path,
+    figures: Path,
+    gpu_hourly_cost_usd: float | None = None,
+) -> None:
     if not rows:
         raise ValueError("report requires measurements")
     figures.mkdir(parents=True, exist_ok=True)
@@ -63,28 +70,52 @@ def generate_report(rows: list[dict[str, object]], report: Path, figures: Path) 
         fifo, "concurrency", ["p95_ttft_ms", "queue_p95_ms"],
         figures / "latency-decomposition.png", "Latency decomposition",
     )
-    policies = frame.groupby("policy", as_index=False).mean(numeric_only=True)
+    comparison_frame = frame
+    policy_names = set(frame["policy"])
+    if {"fifo", "slo"} <= policy_names:
+        common_levels = set(frame[frame.policy == "fifo"].concurrency) & set(
+            frame[frame.policy == "slo"].concurrency
+        )
+        if common_levels:
+            comparison_frame = frame[frame.concurrency == max(common_levels)]
+    policies = comparison_frame.groupby("policy", as_index=False).mean(numeric_only=True)
     _plot(policies, "policy", ["p95_ttft_ms"], figures / "scheduler-comparison.png", "FIFO vs SLO")
     table_lines = [
-        "| policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | power (W) |",
-        "|---|---:|---:|---:|",
+        "| policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | "
+        "power (W) | $ / 1M output tokens |",
+        "|---|---:|---:|---:|---:|",
     ]
-    for policy_name, group in frame.groupby("policy"):
+    for policy_name, group in comparison_frame.groupby("policy"):
         ttft = bootstrap_ci(group["p95_ttft_ms"].astype(float).tolist(), seed=7)
         throughput = bootstrap_ci(group["requests_per_second"].astype(float).tolist(), seed=8)
         power = group["power_watts"].astype(float).mean()
+        power_text = "unavailable" if math.isnan(power) else f"{power:.2f}"
+        output_rate = group.get("output_tokens_per_second")
+        cost_text = "not configured"
+        if gpu_hourly_cost_usd is not None and output_rate is not None:
+            tokens_per_second = output_rate.astype(float).mean()
+            if tokens_per_second > 0:
+                cost = gpu_hourly_cost_usd * 1_000_000 / (tokens_per_second * 3600)
+                cost_text = f"{cost:.4f}"
         table_lines.append(
             f"| {policy_name} | {ttft.estimate:.2f} [{ttft.low:.2f}, {ttft.high:.2f}] | "
             f"{throughput.estimate:.2f} [{throughput.low:.2f}, {throughput.high:.2f}] | "
-            f"{power:.2f} |"
+            f"{power_text} | {cost_text} |"
         )
     table = "\n".join(table_lines)
-    repeats = int(frame.groupby("policy")["repeat"].nunique().min())
+    repeats = int(comparison_frame.groupby("policy")["repeat"].nunique().min())
     verdict = "Insufficient repeated measurements: no optimization claim is made."
-    policy_names = set(frame["policy"])
-    if repeats >= 3 and {"fifo", "slo"} <= policy_names:
-        common = set(frame[frame.policy == "fifo"].concurrency) & set(
-            frame[frame.policy == "slo"].concurrency
+    gpu_evidence = (
+        "evidence_kind" not in comparison_frame
+        or set(comparison_frame["evidence_kind"]) == {"gpu"}
+    )
+    if repeats >= 3 and not gpu_evidence:
+        verdict = (
+            "Mock evidence only: repeated measurements exist, but no optimization claim is made."
+        )
+    if repeats >= 3 and gpu_evidence and {"fifo", "slo"} <= policy_names:
+        common = set(comparison_frame[comparison_frame.policy == "fifo"].concurrency) & set(
+            comparison_frame[comparison_frame.policy == "slo"].concurrency
         )
         if common:
             concurrency = max(common)
@@ -129,6 +160,12 @@ def main() -> None:
     parser.add_argument("input", type=Path)
     parser.add_argument("--report", type=Path, default=Path("REPORT.md"))
     parser.add_argument("--figures", type=Path, default=Path("figures"))
+    parser.add_argument(
+        "--gpu-hourly-cost-usd",
+        type=float,
+        default=float(os.getenv("GPU_HOURLY_COST_USD", "nan")),
+    )
     args = parser.parse_args()
     rows = json.loads(args.input.read_text(encoding="utf-8"))
-    generate_report(rows, args.report, args.figures)
+    hourly_cost = None if math.isnan(args.gpu_hourly_cost_usd) else args.gpu_hourly_cost_usd
+    generate_report(rows, args.report, args.figures, hourly_cost)

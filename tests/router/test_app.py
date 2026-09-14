@@ -77,3 +77,15 @@ def test_vllm_metrics_parser_extracts_cache_and_preemptions() -> None:
         "vllm:prefix_cache_queries_total 40\n"
     )
     assert parsed == {"kv_usage": 0.83, "preemptions": 7, "prefix_cache_hit_rate": 0.75}
+
+
+def test_router_requires_bearer_token_when_configured() -> None:
+    config = BenchConfig.model_validate({"router": {"api_key": "secret"}})
+    client = TestClient(create_app(config, backend=FakeBackend()))
+    assert client.post("/v1/completions", json={"prompt": "hello"}).status_code == 401
+    response = client.post(
+        "/v1/completions",
+        json={"prompt": "hello"},
+        headers={"Authorization": "Bearer secret"},
+    )
+    assert response.status_code == 200

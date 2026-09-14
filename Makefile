@@ -1,4 +1,4 @@
-.PHONY: serve smoke loadtest sweep report site test
+.PHONY: serve smoke loadtest sweep engine-sweep compare report site test
 
 serve:
 	docker compose up --build
@@ -12,6 +12,16 @@ loadtest:
 
 sweep:
 	uv run servebench-experiment --config experiments/baseline.yaml --url $${ROUTER_URL:-http://localhost:8080} --prometheus-url $${PROMETHEUS_URL:-http://localhost:9090}
+
+engine-sweep:
+	@test -n "$${SATURATION_CONCURRENCY}" || (echo "Set SATURATION_CONCURRENCY from the baseline transition"; exit 2)
+	uv run servebench-experiment --config experiments/baseline.yaml --engine-sweep-at $${SATURATION_CONCURRENCY} --url $${ROUTER_URL:-http://localhost:8080} --prometheus-url $${PROMETHEUS_URL:-http://localhost:9090}
+
+compare:
+	@set -e; restore() { ALLOW_POLICY_OVERRIDE=false docker compose up -d --wait --no-deps --force-recreate router >/dev/null; }; \
+	trap restore EXIT; \
+	ALLOW_POLICY_OVERRIDE=true docker compose up -d --wait --no-deps --force-recreate router; \
+	uv run servebench-experiment --config $${SCHEDULER_CONFIG:-experiments/scheduler.yaml} --url $${ROUTER_URL:-http://localhost:8080} --prometheus-url $${PROMETHEUS_URL:-http://localhost:9090} --evidence-kind $${EVIDENCE_KIND:-gpu}
 
 report:
 	@if test -f results/report-input.json; then \

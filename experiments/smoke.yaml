@@ -1,0 +1,9 @@
+name: mock-saturation
+workload: mixed
+seed: 20260914
+repeats: 3
+requests: 12
+policy: fifo
+concurrency:
+  coarse: [1, 2, 4]
+

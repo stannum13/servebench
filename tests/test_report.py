@@ -28,6 +28,7 @@ def test_report_generates_three_graphs_and_evidence_tables(tmp_path: Path) -> No
     assert all((tmp_path / "figures" / name).exists() for name in names)
     text = report.read_text()
     assert "Latency / throughput / cost" in text
+    assert "$ / 1M output tokens" in text
     assert "repeated measurements" in text
     assert "95% CI" in text
     assert "TTFT improved within throughput constraint" in text
@@ -49,3 +50,12 @@ def test_report_accepts_native_runner_summary_schema(tmp_path: Path) -> None:
     report = tmp_path / "REPORT.md"
     generate_report(native, report, tmp_path / "figures")
     assert "240.00" in report.read_text()
+
+
+def test_report_never_claims_mock_policy_improvement(tmp_path: Path) -> None:
+    mock_rows = [{**row, "evidence_kind": "mock"} for row in rows()]
+    report = tmp_path / "REPORT.md"
+    generate_report(mock_rows, report, tmp_path / "figures")
+    text = report.read_text().lower()
+    assert "mock evidence only" in text
+    assert "no optimization claim" in text

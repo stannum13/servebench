@@ -1,0 +1,29 @@
+{
+  "requests": 12,
+  "successful": 12,
+  "failures": 0,
+  "duration_seconds": 0.8082322091795504,
+  "requests_per_second": 14.847218242120533,
+  "input_tokens_per_second": 22805.32721989714,
+  "output_tokens_per_second": 1900.4439349914283,
+  "ttft_ms": {
+    "p50": 7.189958,
+    "p95": 19.535952,
+    "p99": 26.370123
+  },
+  "inter_token_latency_ms": {
+    "p50": 1.997959,
+    "p95": 2.392048,
+    "p99": 2.680529
+  },
+  "e2e_latency_ms": {
+    "p50": 261.923563,
+    "p95": 275.956194,
+    "p99": 282.593539
+  },
+  "queue_time_ms": {
+    "p50": 284.194084,
+    "p95": 545.820938,
+    "p99": 545.940288
+  }
+}

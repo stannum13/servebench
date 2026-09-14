@@ -1,19 +1,23 @@
 # Servebench Report
 
-## Evidence status
+> Generated from machine-readable measurements. Smoke/mock results are not GPU evidence.
 
-GPU baseline measurements are pending. The repository includes a mock smoke path, but mock timings
-are not vLLM or GPU evidence. Therefore, no optimization claim is made.
+## Latency / throughput / cost
 
-## Required analysis after the first GPU run
+| policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | power (W) | $ / 1M output tokens |
+|---|---:|---:|---:|---:|
+| fifo | 21.37 [20.32, 26.26] | 14.29 [13.47, 14.67] | unavailable | not configured |
+| slo | 22.71 [20.19, 24.79] | 12.59 [12.58, 12.60] | unavailable | not configured |
 
-The generated report will connect p95 TTFT to queue time, KV-cache utilization, prefix-cache hit
-rate, preemptions, GPU utilization/memory/power, and throughput. It will compare the SLO policy with
-FIFO using at least three paired measurements and a 95% throughput floor.
+Mock evidence only: repeated measurements exist, but no optimization claim is made.
 
 ## Key graphs
 
-- `figures/saturation.png` — pending GPU sweep
-- `figures/latency-decomposition.png` — pending GPU sweep
-- `figures/scheduler-comparison.png` — pending repeated policy comparison
+![Saturation curve](figures/saturation.png)
 
+![Latency decomposition](figures/latency-decomposition.png)
+
+![Scheduler comparison](figures/scheduler-comparison.png)
+
+Queue growth, KV-cache pressure, and GPU utilization must be interpreted together
+to locate saturation.

@@ -33,6 +33,12 @@ def test_bursty_schedule_contains_concurrency_spike() -> None:
     assert sum(gap == 0 for gap in gaps) >= 9
 
 
+def test_mixed_schedule_preserves_a_burst_component() -> None:
+    times = arrival_schedule("mixed", count=30, rate=2.0, seed=3)
+    gaps = [later - earlier for earlier, later in pairwise(times)]
+    assert sum(gap == 0 for gap in gaps) >= 9
+
+
 def test_mixed_workload_honors_weights() -> None:
     requests = WorkloadGenerator().generate("mixed", 100, 9)
     counts = {kind: sum(request.kind == kind for request in requests) for kind in {

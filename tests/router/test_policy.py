@@ -1,4 +1,5 @@
 from router.policy import FifoPolicy, RequestFeatures, RouterSnapshot, SloPolicy, WorkerState
+from servebench.config import RouterConfig
 
 
 def snapshot(*workers: WorkerState) -> RouterSnapshot:
@@ -40,3 +41,12 @@ def test_slo_routes_to_healthy_alternate_worker() -> None:
     assert decision.action == "admit"
     assert decision.worker == "b"
     assert "alternate" in decision.reason
+
+
+def test_slo_delays_when_transparent_ttft_estimate_exceeds_budget() -> None:
+    config = RouterConfig(policy="slo", ttft_slo_ms=100)
+    decision = SloPolicy(config).decide(
+        RequestFeatures(4096), snapshot(WorkerState("a", 2, 0.20))
+    )
+    assert decision.action == "delay"
+    assert "TTFT estimate" in decision.reason

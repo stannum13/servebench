@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from experiments.runner import (
+    build_refinement_specs,
     build_run_specs,
     compare_policies,
     detect_saturation,
@@ -68,3 +69,33 @@ def test_saturation_detects_throughput_plateau_with_ttft_growth() -> None:
     transition = detect_saturation(rows)
     assert transition.saturation_concurrency == 4
     assert transition.refinement_concurrency == 3
+
+
+def test_refinement_specs_measure_detected_midpoint() -> None:
+    config = {
+        "name": "baseline", "workload": "mixed", "seed": 10, "repeats": 3,
+        "requests": 50, "policy": "fifo",
+        "concurrency": {"coarse": [1, 2, 4], "refine_transition": True},
+    }
+    rows = [
+        {"concurrency": 1, "requests_per_second": 2, "p95_ttft_ms": 100},
+        {"concurrency": 2, "requests_per_second": 3.8, "p95_ttft_ms": 110},
+        {"concurrency": 4, "requests_per_second": 4.0, "p95_ttft_ms": 240},
+    ]
+    specs = build_refinement_specs(config, rows)
+    assert len(specs) == 3
+    assert {spec.concurrency for spec in specs} == {3}
+    assert {spec.seed for spec in specs} == {10, 11, 12}
+
+
+def test_refinement_specs_are_opt_in() -> None:
+    config = {
+        "name": "baseline", "seed": 10, "repeats": 3,
+        "concurrency": {"coarse": [1, 2, 4]},
+    }
+    rows = [
+        {"concurrency": 1, "requests_per_second": 2, "p95_ttft_ms": 100},
+        {"concurrency": 2, "requests_per_second": 3.8, "p95_ttft_ms": 110},
+        {"concurrency": 4, "requests_per_second": 4.0, "p95_ttft_ms": 240},
+    ]
+    assert build_refinement_specs(config, rows) == []

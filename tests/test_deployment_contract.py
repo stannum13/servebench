@@ -12,11 +12,14 @@ def test_compose_contains_required_services_and_gpu_contract() -> None:
     assert devices[0]["capabilities"] == ["gpu"]
     assert "healthcheck" in services["router"] and "healthcheck" in services["vllm"]
     assert any("results" in volume for volume in services["experiment-runner"]["volumes"])
+    for service in ("router", "vllm", "prometheus", "grafana", "dcgm-exporter"):
+        assert all(str(port).startswith("127.0.0.1:") for port in services[service]["ports"])
 
 
 def test_makefile_exposes_operator_commands() -> None:
     text = Path("Makefile").read_text()
-    for target in ("serve", "smoke", "loadtest", "sweep", "report", "site"):
+    targets = ("serve", "smoke", "loadtest", "sweep", "engine-sweep", "compare", "report", "site")
+    for target in targets:
         assert f"{target}:" in text
     smoke_recipe = text.split("smoke:", 1)[1].split("\n\n", 1)[0]
     assert "run --rm --build experiment-runner" in smoke_recipe

@@ -84,7 +84,7 @@ def arrival_schedule(
     now = 0.0
     spike_at = count // 2
     for index in range(count):
-        if kind == "bursty" and spike_at <= index < min(count, spike_at + spike_size):
+        if kind in {"bursty", "mixed"} and spike_at <= index < min(count, spike_at + spike_size):
             arrivals.append(now)
             continue
         now += rng.expovariate(rate)

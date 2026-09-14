@@ -45,9 +45,9 @@ def create_app(results_dir: Path, report_path: Path, figures_dir: Path) -> FastA
 
     @app.get("/api/status")
     async def status() -> dict[str, object]:
-        report = report_path.read_text(encoding="utf-8") if report_path.exists() else ""
-        pending = "gpu" in report.lower() and "pending" in report.lower()
-        return {"gpu_evidence": bool(report) and not pending, "runs": len(await runs())}
+        records = await runs()
+        gpu_evidence = any(record.get("evidence_kind") == "gpu" for record in records)
+        return {"gpu_evidence": gpu_evidence, "runs": len(records)}
 
     @app.get("/report", response_class=PlainTextResponse)
     async def report() -> str:

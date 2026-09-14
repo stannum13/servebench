@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hmac
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
@@ -98,6 +99,15 @@ def create_app(
         return Response(instruments.render(), media_type="text/plain; version=0.0.4")
 
     async def proxy(request: Request) -> Response:
+        if config.router.api_key:
+            expected = f"Bearer {config.router.api_key}"
+            supplied = request.headers.get("Authorization", "")
+            if not hmac.compare_digest(supplied, expected):
+                return JSONResponse(
+                    {"error": {"message": "invalid API key", "type": "authentication"}},
+                    status_code=401,
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
         body: dict[str, object] = await request.json()
         policy_name = config.router.policy
         if config.router.allow_policy_override:

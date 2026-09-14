@@ -1,0 +1,16 @@
+{
+  "keep": false,
+  "ttft_delta_ms": {
+    "estimate": -2.6577589999999987,
+    "low": -9.163246,
+    "high": 0.575189,
+    "confidence": 0.95
+  },
+  "throughput_ratio": {
+    "estimate": 0.93667409268307,
+    "low": 0.916619,
+    "high": 0.972804,
+    "confidence": 0.95
+  },
+  "reason": "confidence or throughput constraint failed"
+}

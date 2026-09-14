@@ -1,0 +1,260 @@
+[
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "duration_seconds": 0.9279221671167761,
+    "requests_per_second": 12.932119120816129,
+    "input_tokens_per_second": 19863.734969573576,
+    "output_tokens_per_second": 1655.3112474644645,
+    "ttft_ms": {
+      "p50": 10.194917,
+      "p95": 29.350979,
+      "p99": 38.101296
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.179083,
+      "p95": 3.437477,
+      "p99": 4.295552
+    },
+    "e2e_latency_ms": {
+      "p50": 295.968375,
+      "p95": 318.721807,
+      "p99": 320.284229
+    },
+    "queue_time_ms": {
+      "p50": 316.022708,
+      "p95": 633.939727,
+      "p99": 634.738345
+    },
+    "kv_cache_peak": 0.0,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "run_id": "fifo-c0004-r00",
+    "policy": "fifo",
+    "repeat": 0,
+    "seed": 20260914,
+    "concurrency": 4,
+    "p95_ttft_ms": 29.350979,
+    "evidence_kind": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "duration_seconds": 0.8929128749296069,
+    "requests_per_second": 13.439161128621897,
+    "input_tokens_per_second": 20642.551493563235,
+    "output_tokens_per_second": 1720.2126244636029,
+    "ttft_ms": {
+      "p50": 6.943833,
+      "p95": 27.445679,
+      "p99": 35.243836
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.072938,
+      "p95": 3.352433,
+      "p99": 4.085356
+    },
+    "e2e_latency_ms": {
+      "p50": 291.798249,
+      "p95": 304.731189,
+      "p99": 305.443238
+    },
+    "queue_time_ms": {
+      "p50": 295.844104,
+      "p95": 601.634481,
+      "p99": 601.847129
+    },
+    "kv_cache_peak": null,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "run_id": "fifo-c0004-r01",
+    "policy": "fifo",
+    "repeat": 1,
+    "seed": 20260915,
+    "concurrency": 4,
+    "p95_ttft_ms": 27.445679,
+    "evidence_kind": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "duration_seconds": 0.8728482499718666,
+    "requests_per_second": 13.748094242483479,
+    "input_tokens_per_second": 21117.072756454625,
+    "output_tokens_per_second": 1759.7560630378853,
+    "ttft_ms": {
+      "p50": 9.177333,
+      "p95": 22.133302,
+      "p99": 28.931027
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.042104,
+      "p95": 3.168733,
+      "p99": 3.780373
+    },
+    "e2e_latency_ms": {
+      "p50": 277.710625,
+      "p95": 313.114913,
+      "p99": 319.811383
+    },
+    "queue_time_ms": {
+      "p50": 320.992958,
+      "p95": 595.180346,
+      "p99": 595.393635
+    },
+    "kv_cache_peak": null,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "run_id": "fifo-c0004-r02",
+    "policy": "fifo",
+    "repeat": 2,
+    "seed": 20260916,
+    "concurrency": 4,
+    "p95_ttft_ms": 22.133302,
+    "evidence_kind": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "duration_seconds": 0.9538635418284684,
+    "requests_per_second": 12.580415828659419,
+    "input_tokens_per_second": 19323.518712820867,
+    "output_tokens_per_second": 1610.2932260684056,
+    "ttft_ms": {
+      "p50": 9.538041,
+      "p95": 20.187733,
+      "p99": 24.955279
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.347354,
+      "p95": 3.512838,
+      "p99": 4.17084
+    },
+    "e2e_latency_ms": {
+      "p50": 312.714645,
+      "p95": 327.943987,
+      "p99": 331.28333
+    },
+    "queue_time_ms": {
+      "p50": 336.645604,
+      "p95": 651.261525,
+      "p99": 651.549139
+    },
+    "kv_cache_peak": 0.0,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "run_id": "slo-c0004-r00",
+    "policy": "slo",
+    "repeat": 0,
+    "seed": 20260914,
+    "concurrency": 4,
+    "p95_ttft_ms": 20.187733,
+    "evidence_kind": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "duration_seconds": 0.9532802090980113,
+    "requests_per_second": 12.588114056573499,
+    "input_tokens_per_second": 19335.343190896896,
+    "output_tokens_per_second": 1611.2785992414078,
+    "ttft_ms": {
+      "p50": 7.49425,
+      "p95": 24.78792,
+      "p99": 30.828351
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.244,
+      "p95": 3.424264,
+      "p99": 4.242946
+    },
+    "e2e_latency_ms": {
+      "p50": 309.207105,
+      "p95": 322.164317,
+      "p99": 322.47063
+    },
+    "queue_time_ms": {
+      "p50": 324.010708,
+      "p95": 631.285181,
+      "p99": 631.40037
+    },
+    "kv_cache_peak": 0.0,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "run_id": "slo-c0004-r01",
+    "policy": "slo",
+    "repeat": 1,
+    "seed": 20260915,
+    "concurrency": 4,
+    "p95_ttft_ms": 24.78792,
+    "evidence_kind": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "duration_seconds": 0.9522474168334156,
+    "requests_per_second": 12.601766923038298,
+    "input_tokens_per_second": 19356.313993786825,
+    "output_tokens_per_second": 1613.0261661489021,
+    "ttft_ms": {
+      "p50": 7.358125,
+      "p95": 22.708491,
+      "p99": 29.712631
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.289084,
+      "p95": 3.464222,
+      "p99": 4.195749
+    },
+    "e2e_latency_ms": {
+      "p50": 314.799458,
+      "p95": 320.782646,
+      "p99": 321.817929
+    },
+    "queue_time_ms": {
+      "p50": 315.548854,
+      "p95": 632.257246,
+      "p99": 632.470316
+    },
+    "kv_cache_peak": null,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "run_id": "slo-c0004-r02",
+    "policy": "slo",
+    "repeat": 2,
+    "seed": 20260916,
+    "concurrency": 4,
+    "p95_ttft_ms": 22.708491,
+    "evidence_kind": "mock"
+  }
+]

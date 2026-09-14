@@ -68,6 +68,20 @@ class SloPolicy:
             reason = "long prompt delayed under KV pressure" if long_prompt else "KV soft limit"
             delay = min(self.config.max_delay_ms / 1000, 0.05 + selected.queue_depth * 0.005)
             return Decision("delay", selected.name, delay_seconds=delay, reason=reason)
+        estimated_ttft_ms = (
+            20
+            + request.prompt_tokens * 0.05
+            + selected.queue_depth * 40
+            + selected.kv_usage * 100
+        )
+        if estimated_ttft_ms > self.config.ttft_slo_ms:
+            delay = min(self.config.max_delay_ms / 1000, 0.025 + selected.queue_depth * 0.005)
+            return Decision(
+                "delay",
+                selected.name,
+                delay_seconds=delay,
+                reason=f"TTFT estimate {estimated_ttft_ms:.0f}ms exceeds SLO",
+            )
         if selected.queue_depth >= max(1, self.config.queue_limit // 8):
             delay = min(self.config.max_delay_ms / 1000, 0.025 + selected.queue_depth * 0.005)
             return Decision("delay", selected.name, delay_seconds=delay, reason="queue pressure")

@@ -14,6 +14,7 @@ import yaml
 
 from servebench.stats import ConfidenceInterval, bootstrap_ci
 
+from .state import append_state
 from .telemetry import PrometheusTelemetry
 
 
@@ -100,6 +101,19 @@ def build_run_specs(config: dict[str, object]) -> list[RunSpec]:
     ]
 
 
+def build_refinement_specs(
+    config: dict[str, object], rows: list[dict[str, object]]
+) -> list[RunSpec]:
+    concurrency = config.get("concurrency")
+    if not isinstance(concurrency, dict) or not concurrency.get("refine_transition", False):
+        return []
+    transition = detect_saturation(rows)  # type: ignore[arg-type]
+    if transition.refinement_concurrency is None:
+        return []
+    refined = {**config, "concurrency": {"coarse": [transition.refinement_concurrency]}}
+    return build_run_specs(refined)
+
+
 def detect_saturation(rows: list[dict[str, float]]) -> SaturationTransition:
     grouped: dict[int, list[dict[str, float]]] = {}
     for row in rows:
@@ -132,12 +146,13 @@ def execute_suite(
     url: str,
     results_root: Path,
     prometheus_url: str | None = None,
+    evidence_kind: str = "gpu",
 ) -> list[dict[str, object]]:
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     specs = build_run_specs(config)
     rows: list[dict[str, object]] = []
     telemetry = PrometheusTelemetry(prometheus_url) if prometheus_url else None
-    for spec in specs:
+    def run(spec: RunSpec) -> dict[str, object]:
         output_dir = results_root / spec.suite / spec.run_id
         output = output_dir / "requests.jsonl"
         command = [
@@ -158,19 +173,95 @@ def execute_suite(
             "run_id": spec.run_id, "policy": spec.policy, "repeat": spec.repeat,
             "seed": spec.seed, "concurrency": spec.concurrency,
             "p95_ttft_ms": summary["ttft_ms"]["p95"],
+            "evidence_kind": evidence_kind,
         })
-        rows.append(summary)
-    if telemetry:
-        telemetry.close()
+        return summary
+
+    try:
+        for spec in specs:
+            rows.append(run(spec))
+        for spec in build_refinement_specs(config, rows):
+            rows.append(run(spec))
+    finally:
+        if telemetry:
+            telemetry.close()
     suite_dir = results_root / str(config["name"])
     (suite_dir / "runs.json").write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
+    refresh_report_input(results_root)
+
+    levels = {int(row["concurrency"]) for row in rows}
+    if len(levels) >= 2:
+        transition = detect_saturation(rows)  # type: ignore[arg-type]
+        (suite_dir / "transition.json").write_text(
+            json.dumps(asdict(transition), indent=2) + "\n", encoding="utf-8"
+        )
+        append_state(
+            Path("BENCH_STATE.md"),
+            run_id=str(config["name"]),
+            bottleneck=f"transition near concurrency {transition.saturation_concurrency}",
+            hypothesis=(
+                "queue, KV, and GPU telemetry at the transition identify "
+                "the limiting resource"
+            ),
+            variable="concurrency",
+            decision="inconclusive",
+        )
+    policies = {str(row["policy"]) for row in rows}
+    if {"fifo", "slo"} <= policies:
+        compare_and_record_policies(config, rows, suite_dir, evidence_kind)
+    return rows
+
+
+def refresh_report_input(results_root: Path) -> None:
     report_rows: list[dict[str, object]] = []
     for path in results_root.glob("*/runs.json"):
         report_rows.extend(json.loads(path.read_text(encoding="utf-8")))
     (results_root / "report-input.json").write_text(
         json.dumps(report_rows, indent=2) + "\n", encoding="utf-8"
     )
-    return rows
+
+
+def compare_and_record_policies(
+    config: dict[str, object],
+    rows: list[dict[str, object]],
+    suite_dir: Path,
+    evidence_kind: str,
+) -> None:
+    common = sorted(
+        {int(row["concurrency"]) for row in rows if row["policy"] == "fifo"}
+        & {int(row["concurrency"]) for row in rows if row["policy"] == "slo"}
+    )
+    if not common:
+        return
+    level = common[-1]
+    fifo = sorted(
+        (row for row in rows if row["policy"] == "fifo" and row["concurrency"] == level),
+        key=lambda row: int(row["repeat"]),
+    )
+    slo = sorted(
+        (row for row in rows if row["policy"] == "slo" and row["concurrency"] == level),
+        key=lambda row: int(row["repeat"]),
+    )
+    comparison = compare_policies(
+        [float(row["p95_ttft_ms"]) for row in fifo],
+        [float(row["p95_ttft_ms"]) for row in slo],
+        [float(row["requests_per_second"]) for row in fifo],
+        [float(row["requests_per_second"]) for row in slo],
+    )
+    (suite_dir / "comparison.json").write_text(
+        json.dumps(comparison_as_dict(comparison), indent=2) + "\n", encoding="utf-8"
+    )
+    decision = "keep" if comparison.keep else "revert"
+    if evidence_kind != "gpu":
+        decision = "inconclusive"
+    append_state(
+        Path("BENCH_STATE.md"),
+        run_id=str(config["name"]),
+        bottleneck="mixed-workload p95 TTFT at saturation",
+        hypothesis="SLO admission reduces p95 TTFT while preserving 95% of FIFO throughput",
+        variable="scheduling policy",
+        decision=decision,
+    )
 
 
 def main() -> None:
@@ -180,10 +271,30 @@ def main() -> None:
     parser.add_argument("--url", default="http://localhost:8080")
     parser.add_argument("--results-root", type=Path, default=Path("results"))
     parser.add_argument("--prometheus-url")
+    parser.add_argument("--engine-sweep-at", type=int)
+    parser.add_argument("--vllm-health-url", default="http://localhost:8000/health")
+    parser.add_argument("--evidence-kind", choices=["gpu", "mock"], default="gpu")
     parser.add_argument("--output", type=Path, default=Path("results/experiment-manifest.json"))
     args = parser.parse_args()
+    if args.engine_sweep_at:
+        if not args.config or not args.prometheus_url:
+            parser.error("--engine-sweep-at requires --config and --prometheus-url")
+        from .engine import execute_engine_sweeps
+
+        rows = execute_engine_sweeps(
+            args.config,
+            args.engine_sweep_at,
+            args.url,
+            args.prometheus_url,
+            args.vllm_health_url,
+            args.results_root,
+        )
+        print(json.dumps({"engine_runs": len(rows)}))
+        return
     if args.config:
-        rows = execute_suite(args.config, args.url, args.results_root, args.prometheus_url)
+        rows = execute_suite(
+            args.config, args.url, args.results_root, args.prometheus_url, args.evidence_kind
+        )
         print(json.dumps({"runs": len(rows), "suite": args.config.stem}))
         return
     summaries = [json.loads(path.read_text(encoding="utf-8")) for path in args.summary_files]

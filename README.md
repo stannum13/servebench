@@ -27,6 +27,10 @@ uses queue depth, estimated prompt tokens, and KV pressure to admit, briefly del
 explicit HTTP 429, or select the least-pressured worker. `ROUTER_POLICY=fifo` is the baseline;
 `ROUTER_POLICY=slo` enables the controller.
 
+For any network-accessible deployment, set a strong `ROUTER_API_KEY` and keep vLLM port 8000
+private behind a firewall or reverse proxy. Only the read-only `web` service should be published at
+`www.shivanknigam.com`; vLLM documents that its own API-key option does not protect every endpoint.
+
 ## Start and validate
 
 Prerequisites for the real stack are Docker Compose, an NVIDIA GPU, NVIDIA Container Toolkit, and
@@ -52,6 +56,8 @@ make serve       # real vLLM + router + monitoring
 make smoke       # mock backend and a small end-to-end load run
 make loadtest    # mixed workload against ROUTER_URL
 make sweep       # assemble transition-focused run summaries
+make engine-sweep SATURATION_CONCURRENCY=32  # independent engine variants
+make compare     # repeated FIFO/SLO comparison; override is enabled then restored safely
 make report      # regenerate REPORT.md and figures
 make site        # serve the read-only results site on port 8081
 make test        # unit and integration tests
@@ -59,8 +65,10 @@ make test        # unit and integration tests
 
 Override `REQUESTS`, `CONCURRENCY`, and `ROUTER_URL` for `make loadtest`. Engine experiments use
 `MAX_BATCHED_TOKENS`, `MAX_SEQS`, `ROUTER_POLICY`, and the variants in
-`experiments/baseline.yaml`. Quantized runs use one supported AWQ checkpoint supplied via `MODEL`;
-they must not silently quantize the BF16 checkpoint.
+`experiments/baseline.yaml`. Quantized runs use the supported AWQ checkpoint configured as
+`quantized_model`; they never silently quantize the BF16 checkpoint. Every engine candidate is
+paired with a fresh repeated baseline, changes one setting, writes confidence intervals to
+`decision.json`, and restores the baseline engine even if a run fails.
 
 ## Workloads and protocol
 
@@ -93,6 +101,7 @@ storage and linked from the report. `BENCH_STATE.md` is the append-only hypothes
 - [Latency decomposition](figures/latency-decomposition.png): TTFT against queue contribution.
 - [FIFO vs SLO scheduler](figures/scheduler-comparison.png): repeated policy comparison.
 
-Grafana is available on port 3000, Prometheus on 9090, the router on 8080, and vLLM on 8000. The
-generated figures and `REPORT.md` are static deployable artifacts suitable for publishing on
-`www.shivanknigam.com`; a themed presentation layer can consume the same result schema later.
+Grafana is available on port 3000, Prometheus on 9090, the router on 8080, and vLLM on 8000. These
+operator ports bind to loopback by default. The `web` service is the only public bind; its generated
+figures and `REPORT.md` are suitable for publishing on `www.shivanknigam.com`, and a themed
+presentation layer can consume the same result schema later.

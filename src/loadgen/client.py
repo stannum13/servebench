@@ -22,6 +22,7 @@ class LoadOptions:
     concurrency: int
     timeout_seconds: float = 300.0
     model: str = "Qwen/Qwen2.5-7B-Instruct"
+    api_key: str | None = None
 
 
 async def _request(
@@ -44,7 +45,14 @@ async def _request(
                 async with client.stream(
                     "POST",
                     options.url.rstrip("/") + "/v1/completions",
-                    headers={"X-Servebench-Policy": options.policy},
+                    headers={
+                        "X-Servebench-Policy": options.policy,
+                        **(
+                            {"Authorization": f"Bearer {options.api_key}"}
+                            if options.api_key
+                            else {}
+                        ),
+                    },
                     json={
                         "model": options.model,
                         "prompt": spec.prompt,
