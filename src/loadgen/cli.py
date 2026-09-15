@@ -14,6 +14,7 @@ from servebench.stats import summarize_measurements
 from servebench.workloads import WorkloadGenerator, arrival_schedule
 
 from .client import LoadOptions, run_load
+from .tokenize import calibrate_requests
 
 
 def main() -> None:
@@ -24,6 +25,8 @@ def main() -> None:
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--seed", type=int, default=20260914)
     parser.add_argument("--policy", default="fifo")
+    parser.add_argument("--model", default=os.getenv("MODEL", "Qwen/Qwen2.5-7B-Instruct"))
+    parser.add_argument("--tokenizer-url", default=os.getenv("TOKENIZER_URL"))
     parser.add_argument("--api-key", default=os.getenv("ROUTER_API_KEY"))
     parser.add_argument(
         "--request-rate", type=float, default=0,
@@ -33,8 +36,10 @@ def main() -> None:
     args = parser.parse_args()
     run_id = str(uuid.uuid4())
     specs = WorkloadGenerator().generate(args.workload, args.requests, args.seed)
+    if args.tokenizer_url:
+        specs = asyncio.run(calibrate_requests(specs, args.tokenizer_url, args.model))
     options = LoadOptions(
-        run_id, args.url, args.policy, args.concurrency, api_key=args.api_key
+        run_id, args.url, args.policy, args.concurrency, model=args.model, api_key=args.api_key
     )
     offsets = (
         arrival_schedule(args.workload, args.requests, args.request_rate, args.seed)

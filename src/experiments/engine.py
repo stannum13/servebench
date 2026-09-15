@@ -48,6 +48,15 @@ def compare_engine_variant(
     )
 
 
+def engine_evidence_verified(
+    baseline_rows: list[dict[str, object]], variant_rows: list[dict[str, object]]
+) -> bool:
+    return all(
+        row.get("evidence_kind") == "gpu" and row.get("p95_ttft_ms") is not None
+        for row in baseline_rows + variant_rows
+    )
+
+
 def _slug(value: object) -> str:
     return str(value).lower().replace("_", "-")
 
@@ -130,15 +139,15 @@ def execute_engine_sweeps(
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     baseline = config["engine_baseline"]
     variants = build_engine_variants(baseline, config["independent_sweeps"])
-    model = str(config.get("model", os.getenv("MODEL", "Qwen/Qwen2.5-7B-Instruct")))
-    quantized = str(config["quantized_model"])
+    model = str(os.getenv("MODEL", config.get("model", "Qwen/Qwen2.5-7B-Instruct")))
+    quantized = str(os.getenv("QUANTIZED_MODEL", config["quantized_model"]))
     baseline_environment = compose_environment(baseline, model, quantized)
     rows: list[dict[str, object]] = []
     try:
         restart_vllm(baseline_environment, health_url)
         baseline_rows = _execute_variant_suite(
             "baseline", None, baseline, config, saturation_concurrency,
-            router_url, prometheus_url, results_root,
+            router_url, prometheus_url, results_root, model,
         )
         rows.extend(baseline_rows)
         for variant in variants:
@@ -146,20 +155,36 @@ def execute_engine_sweeps(
             variant_rows = _execute_variant_suite(
                 variant.name, variant.variable, variant.settings, config,
                 saturation_concurrency, router_url, prometheus_url, results_root,
+                quantized if variant.settings["precision"] == "awq" else model,
             )
-            comparison = compare_engine_variant(
-                [float(row["p95_ttft_ms"]) for row in baseline_rows],
-                [float(row["p95_ttft_ms"]) for row in variant_rows],
-                [float(row["requests_per_second"]) for row in baseline_rows],
-                [float(row["requests_per_second"]) for row in variant_rows],
+            first_tokens_present = all(
+                row.get("p95_ttft_ms") is not None
+                for row in baseline_rows + variant_rows
+            )
+            comparison = (
+                compare_engine_variant(
+                    [float(row["p95_ttft_ms"]) for row in baseline_rows],
+                    [float(row["p95_ttft_ms"]) for row in variant_rows],
+                    [float(row["requests_per_second"]) for row in baseline_rows],
+                    [float(row["requests_per_second"]) for row in variant_rows],
+                ) if first_tokens_present else None
+            )
+            verified = engine_evidence_verified(baseline_rows, variant_rows)
+            reason = (
+                comparison.reason if verified and comparison is not None
+                else "GPU telemetry or successful first tokens missing; no engine claim"
             )
             variant_dir = results_root / f"engine-{variant.name}"
             (variant_dir / "decision.json").write_text(
                 json.dumps({
-                    "keep": comparison.keep,
-                    "ttft_delta_ms": asdict(comparison.ttft_delta_ms),
-                    "throughput_ratio": asdict(comparison.throughput_ratio),
-                    "reason": comparison.reason,
+                    "keep": bool(verified and comparison and comparison.keep),
+                    "ttft_delta_ms": (
+                        asdict(comparison.ttft_delta_ms) if comparison else None
+                    ),
+                    "throughput_ratio": (
+                        asdict(comparison.throughput_ratio) if comparison else None
+                    ),
+                    "reason": reason,
                 }, indent=2) + "\n",
                 encoding="utf-8",
             )
@@ -169,7 +194,19 @@ def execute_engine_sweeps(
                 bottleneck="p95 TTFT at the measured saturation point",
                 hypothesis=f"changing only {variant.variable} improves p95 TTFT",
                 variable=variant.variable,
-                decision="keep" if comparison.keep else "revert",
+                decision=(
+                    "inconclusive" if not verified else
+                    "keep" if comparison and comparison.keep else "revert"
+                ),
+                measurement=(
+                    "p95 TTFT delta: "
+                    f"{comparison.ttft_delta_ms.estimate:.2f} ms, 95% CI "
+                    f"[{comparison.ttft_delta_ms.low:.2f}, "
+                    f"{comparison.ttft_delta_ms.high:.2f}] ms; throughput ratio: "
+                    f"{comparison.throughput_ratio.estimate:.3f}, 95% CI "
+                    f"[{comparison.throughput_ratio.low:.3f}, "
+                    f"{comparison.throughput_ratio.high:.3f}]"
+                ) if comparison else "No successful first token in one or more repeats",
             )
             rows.extend(variant_rows)
         refresh_report_input(results_root)
@@ -187,6 +224,7 @@ def _execute_variant_suite(
     router_url: str,
     prometheus_url: str,
     results_root: Path,
+    served_model: str,
 ) -> list[dict[str, object]]:
     from .runner import execute_suite
 
@@ -198,6 +236,7 @@ def _execute_variant_suite(
         "repeats": config["repeats"],
         "requests": config.get("requests", 100),
         "policy": "fifo",
+        "model": served_model,
         "concurrency": {"coarse": [saturation_concurrency]},
     }
     with tempfile.TemporaryDirectory(prefix="servebench-engine-") as directory:
@@ -211,6 +250,7 @@ def _execute_variant_suite(
             "engine_settings": settings,
         })
     variant_dir = results_root / suite_name
+    variant_dir.mkdir(parents=True, exist_ok=True)
     (variant_dir / "runs.json").write_text(
         json.dumps(variant_rows, indent=2) + "\n", encoding="utf-8"
     )

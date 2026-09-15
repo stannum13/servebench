@@ -20,7 +20,21 @@ def test_summary_includes_latency_throughput_and_failures() -> None:
     assert summary["output_tokens_per_second"] > 0
 
 
+def test_summary_separates_timeouts_and_overload_rejections() -> None:
+    summary = summarize_measurements([
+        item(0), item(1, status="timeout"), item(2, status="rejected")
+    ])
+    assert summary["timeouts"] == 1
+    assert summary["rejections"] == 1
+    assert summary["failures"] == 2
+
+
 def test_bootstrap_confidence_interval_is_deterministic() -> None:
     first = bootstrap_ci([1.0, 2.0, 3.0, 4.0], seed=22, samples=200)
     assert first == bootstrap_ci([1.0, 2.0, 3.0, 4.0], seed=22, samples=200)
     assert first.low <= first.estimate <= first.high
+
+
+def test_bootstrap_point_estimate_matches_bootstrapped_mean() -> None:
+    interval = bootstrap_ci([1.0, 1.0, 7.0], seed=22, samples=200)
+    assert interval.estimate == 3.0

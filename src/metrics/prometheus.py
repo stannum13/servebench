@@ -7,8 +7,13 @@ class RouterMetrics:
     def __init__(self) -> None:
         self.registry = CollectorRegistry()
         self.queue = Gauge(
-            "servebench_router_queue_depth", "Requests assigned to a worker", ["worker"],
+            "servebench_router_queue_depth", "Requests assigned to a worker (in-flight)",
+            ["worker"],
             registry=self.registry,
+        )
+        self.backend_waiting = Gauge(
+            "servebench_backend_waiting_requests", "vLLM waiting requests sampled per worker",
+            ["worker"], registry=self.registry,
         )
         self.kv = Gauge(
             "servebench_worker_kv_cache_usage_ratio", "Worker KV cache utilization", ["worker"],

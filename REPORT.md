@@ -6,8 +6,8 @@
 
 | policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | power (W) | $ / 1M output tokens |
 |---|---:|---:|---:|---:|
-| fifo | 21.37 [20.32, 26.26] | 14.29 [13.47, 14.67] | unavailable | not configured |
-| slo | 22.71 [20.19, 24.79] | 12.59 [12.58, 12.60] | unavailable | not configured |
+| fifo | 23.17 [20.32, 26.26] | 14.11 [13.47, 14.67] | unavailable | not configured |
+| slo | 22.56 [20.19, 24.79] | 12.59 [12.58, 12.60] | unavailable | not configured |
 
 Mock evidence only: repeated measurements exist, but no optimization claim is made.
 
@@ -16,6 +16,8 @@ Mock evidence only: repeated measurements exist, but no optimization claim is ma
 ![Saturation curve](figures/saturation.png)
 
 ![Latency decomposition](figures/latency-decomposition.png)
+
+Stage measurements unavailable in these legacy runs. The queue series in the figure is client queue (loadgen semaphore wait), not router or vLLM queue.
 
 ![Scheduler comparison](figures/scheduler-comparison.png)
 

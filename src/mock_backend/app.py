@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import zlib
 
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse, StreamingResponse
@@ -29,18 +30,30 @@ def create_app(token_delay: float = 0.001) -> FastAPI:
             "vllm:num_preemptions_total 0\n"
         )
 
+    @app.post("/tokenize")
+    async def tokenize(request: Request) -> dict[str, object]:
+        body = await request.json()
+        words = str(body.get("prompt", "")).split()
+        tokens = [zlib.crc32(word.encode()) % 50000 for word in words]
+        return {"count": len(tokens), "tokens": tokens, "max_model_len": 32768}
+
     @app.post("/v1/completions")
     async def completions(request: Request) -> StreamingResponse:
         body = await request.json()
         count = int(body.get("max_tokens", 128))
+        prompt = body.get("prompt", "")
+        prompt_count = len(prompt) if isinstance(prompt, list) else len(str(prompt).split())
 
         async def events():
             for index in range(count):
                 if token_delay:
                     await asyncio.sleep(token_delay)
-                yield f'data: {json.dumps({"choices": [{"text": f" t{index}"}]})}\n\n'
+                choice = {"text": f" t{index}", "token_ids": [index]}
+                if index == 0:
+                    choice["prompt_token_ids"] = list(range(prompt_count))
+                yield f'data: {json.dumps({"choices": [choice]})}\n\n'
             usage = {
-                "prompt_tokens": len(str(body.get("prompt", "")).split()),
+                "prompt_tokens": prompt_count,
                 "completion_tokens": count,
             }
             yield f'data: {json.dumps({"choices": [], "usage": usage})}\n\n'

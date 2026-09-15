@@ -14,6 +14,7 @@ def test_compose_contains_required_services_and_gpu_contract() -> None:
     assert any("results" in volume for volume in services["experiment-runner"]["volumes"])
     for service in ("router", "vllm", "prometheus", "grafana", "dcgm-exporter"):
         assert all(str(port).startswith("127.0.0.1:") for port in services[service]["ports"])
+    assert "${GRAFANA_HOST_PORT:-3000}" in services["grafana"]["ports"][0]
 
 
 def test_makefile_exposes_operator_commands() -> None:

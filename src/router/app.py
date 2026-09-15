@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hmac
 import os
+import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
 from typing import Protocol
@@ -30,6 +31,8 @@ class Backend(Protocol):
 
 def _prompt_tokens(body: dict[str, object]) -> int:
     prompt = body.get("prompt", "")
+    if isinstance(prompt, list) and all(isinstance(token, int) for token in prompt):
+        return len(prompt)
     if not prompt and isinstance(body.get("messages"), list):
         messages = body["messages"]
         prompt = " ".join(
@@ -60,6 +63,7 @@ def create_app(
                             kv_usage=float(values.get("kv_usage", 0)),
                             prefix_cache_hit_rate=values.get("prefix_cache_hit_rate"),
                             preemptions=int(values.get("preemptions", 0)),
+                            backend_waiting=int(values.get("backend_waiting", 0)),
                         )
                     except Exception:  # metric loss must not stop inference
                         continue
@@ -92,6 +96,7 @@ def create_app(
     async def metrics() -> Response:
         for worker in router_state.workers.values():
             instruments.queue.labels(worker.name).set(worker.queue_depth)
+            instruments.backend_waiting.labels(worker.name).set(worker.backend_waiting)
             instruments.kv.labels(worker.name).set(worker.kv_usage)
             if worker.prefix_cache_hit_rate is not None:
                 instruments.prefix_hits.labels(worker.name).set(worker.prefix_cache_hit_rate)
@@ -99,6 +104,7 @@ def create_app(
         return Response(instruments.render(), media_type="text/plain; version=0.0.4")
 
     async def proxy(request: Request) -> Response:
+        admission_started = time.monotonic()
         if config.router.api_key:
             expected = f"Bearer {config.router.api_key}"
             supplied = request.headers.get("Authorization", "")
@@ -115,18 +121,25 @@ def create_app(
         policy = policies.get(policy_name)
         if policy is None:
             return JSONResponse({"error": {"message": "unknown policy"}}, status_code=400)
-        decision = policy.decide(RequestFeatures(_prompt_tokens(body)), router_state.snapshot())
+        features = RequestFeatures(_prompt_tokens(body))
+        decision = await router_state.reserve(policy, features)
         instruments.decisions.labels(decision.action).inc()
+        if decision.action == "delay":
+            await asyncio.sleep(decision.delay_seconds)
+            decision = await router_state.reserve(policy, features, after_delay=True)
+            instruments.decisions.labels(decision.action).inc()
         if decision.action == "reject" or decision.worker is None:
             return JSONResponse(
                 {"error": {"message": decision.reason, "type": "overload"}},
                 status_code=429,
                 headers={"Retry-After": "1"},
             )
-        if decision.action == "delay":
-            await asyncio.sleep(decision.delay_seconds)
         worker = decision.worker
-        await router_state.acquire(worker)
+        headers = {
+            "X-Servebench-Worker": worker,
+            "X-Servebench-Admission-Ms": f"{(time.monotonic() - admission_started) * 1000:.6f}",
+            "X-Servebench-KV-Usage": f"{router_state.workers[worker].kv_usage:.6f}",
+        }
         if body.get("stream"):
             async def chunks() -> AsyncIterator[bytes]:
                 try:
@@ -134,10 +147,12 @@ def create_app(
                         yield chunk
                 finally:
                     await router_state.release(worker)
-            return StreamingResponse(chunks(), media_type="text/event-stream")
+            return StreamingResponse(chunks(), media_type="text/event-stream", headers=headers)
         try:
             status, content = await transport.complete(worker, request.url.path, body)
-            return Response(content, status_code=status, media_type="application/json")
+            return Response(
+                content, status_code=status, media_type="application/json", headers=headers
+            )
         finally:
             await router_state.release(worker)
 

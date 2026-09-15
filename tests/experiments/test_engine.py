@@ -1,6 +1,14 @@
+from pathlib import Path
+
 import pytest
 
-from experiments.engine import build_engine_variants, compare_engine_variant, compose_environment
+from experiments.engine import (
+    _execute_variant_suite,
+    build_engine_variants,
+    compare_engine_variant,
+    compose_environment,
+    engine_evidence_verified,
+)
 
 
 def baseline() -> dict[str, object]:
@@ -50,3 +58,27 @@ def test_engine_variant_reverts_when_throughput_floor_fails() -> None:
         [100, 105, 110], [75, 80, 85], [10, 10, 10], [8, 8, 8]
     )
     assert comparison.keep is False
+
+
+def test_engine_variant_suite_requests_actual_served_model(tmp_path: Path, monkeypatch) -> None:
+    captured = []
+
+    def fake_execute_suite(path, *args):
+        import yaml
+        captured.append(yaml.safe_load(path.read_text())["model"])
+        return [{"p95_ttft_ms": 100, "requests_per_second": 10}]
+
+    monkeypatch.setattr("experiments.runner.execute_suite", fake_execute_suite)
+    _execute_variant_suite(
+        "awq", "precision", {**baseline(), "precision": "awq"},
+        {"seed": 1, "repeats": 3, "requests": 10}, 1,
+        "http://router", "http://prometheus", tmp_path, "quantized/model",
+    )
+    assert captured == ["quantized/model"]
+
+
+def test_engine_candidate_cannot_be_kept_with_missing_gpu_or_first_tokens() -> None:
+    complete = {"evidence_kind": "gpu", "p95_ttft_ms": 100}
+    assert engine_evidence_verified([complete], [complete]) is True
+    assert engine_evidence_verified([complete], [{**complete, "evidence_kind": "unknown"}]) is False
+    assert engine_evidence_verified([complete], [{**complete, "p95_ttft_ms": None}]) is False

@@ -1,5 +1,4 @@
 name: baseline-saturation
-model: Qwen/Qwen2.5-7B-Instruct
 workload: mixed
 seed: 20260914
 repeats: 3

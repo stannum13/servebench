@@ -14,19 +14,21 @@ def append_state(
     hypothesis: str,
     variable: str,
     decision: str,
+    measurement: str | None = None,
 ) -> None:
     if decision not in {"keep", "revert", "inconclusive"}:
         raise ValueError("decision must be keep, revert, or inconclusive")
     if not path.exists():
         path.write_text("# Servebench Experiment State\n\n", encoding="utf-8")
     timestamp = datetime.now(UTC).isoformat(timespec="seconds")
+    measurement_line = f"- Measurement: {measurement}\n" if measurement else ""
     entry = (
         f"## {run_id} — {timestamp}\n\n"
         f"- Bottleneck: {bottleneck}\n"
         f"- Hypothesis: {hypothesis}\n"
         f"- Variable changed: {variable}\n"
+        f"{measurement_line}"
         f"- Decision: {decision}\n\n"
     )
     with path.open("a", encoding="utf-8") as handle:
         handle.write(entry)
-

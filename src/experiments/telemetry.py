@@ -21,30 +21,45 @@ class PrometheusTelemetry:
         results = response.json()["data"]["result"]
         if not results:
             return None
-        return float(results[0]["value"][1])
+        if len(results) != 1:
+            raise ValueError("telemetry query returned multiple series; aggregate it explicitly")
+        value = float(results[0]["value"][1])
+        return value if math.isfinite(value) else None
 
     def collect(self, started_at: float, completed_at: float) -> dict[str, float | None]:
-        window = max(1, math.ceil(completed_at - started_at))
+        window = max(10, math.ceil(completed_at - started_at))
         span = f"[{window}s]"
+
+        def histogram_mean_ms(name: str) -> str:
+            numerator = f"sum(increase({name}_sum{span}))"
+            denominator = f"sum(increase({name}_count{span}))"
+            return f"({numerator} / {denominator}) * 1000"
+
         expressions = {
             "kv_cache_peak": (
-                f"max_over_time(vllm:kv_cache_usage_perc{span}) or "
-                f"max_over_time(vllm:gpu_cache_usage_perc{span})"
+                f"max(max_over_time(vllm:kv_cache_usage_perc{span}) or "
+                f"max_over_time(vllm:gpu_cache_usage_perc{span}))"
             ),
             "preemptions": (
-                f"increase(vllm:num_preemptions_total{span}) or "
-                f"increase(vllm:num_preemptions{span})"
+                f"sum(increase(vllm:num_preemptions_total{span}) or "
+                f"increase(vllm:num_preemptions{span}))"
             ),
             "prefix_cache_hit_rate": (
-                f"(increase(vllm:prefix_cache_hits_total{span}) or "
+                f"sum(increase(vllm:prefix_cache_hits_total{span}) or "
                 f"increase(vllm:prefix_cache_hits{span})) / "
-                f"(increase(vllm:prefix_cache_queries_total{span}) or "
+                f"sum(increase(vllm:prefix_cache_queries_total{span}) or "
                 f"increase(vllm:prefix_cache_queries{span}))"
             ),
-            "gpu_utilization_peak": f"max_over_time(DCGM_FI_DEV_GPU_UTIL{span})",
-            "gpu_memory_peak_mib": f"max_over_time(DCGM_FI_DEV_FB_USED{span})",
-            "gpu_power_average_watts": f"avg_over_time(DCGM_FI_DEV_POWER_USAGE{span})",
-            "vllm_queue_peak": f"max_over_time(vllm:num_requests_waiting{span})",
+            "gpu_utilization_peak": f"max(max_over_time(DCGM_FI_DEV_GPU_UTIL{span}))",
+            "gpu_memory_peak_mib": f"max(max_over_time(DCGM_FI_DEV_FB_USED{span}))",
+            "gpu_power_average_watts": f"sum(avg_over_time(DCGM_FI_DEV_POWER_USAGE{span}))",
+            "vllm_queue_peak": (
+                f"max_over_time((sum(vllm:num_requests_waiting))[{window}s:5s])"
+            ),
+            "vllm_queue_mean_ms": histogram_mean_ms("vllm:request_queue_time_seconds"),
+            "vllm_prefill_mean_ms": histogram_mean_ms("vllm:request_prefill_time_seconds"),
+            "vllm_ttft_mean_ms": histogram_mean_ms("vllm:time_to_first_token_seconds"),
+            "vllm_decode_mean_ms": histogram_mean_ms("vllm:request_decode_time_seconds"),
         }
         return {
             name: self._query(expression, completed_at)

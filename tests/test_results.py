@@ -8,7 +8,7 @@ def measurement() -> RequestMeasurement:
         run_id="run-1", request_id="r1", workload="short", policy="fifo",
         prompt_tokens=256, output_tokens=3, scheduled_at=1.0, started_at=1.1,
         first_token_at=1.4, token_timestamps=[1.4, 1.5, 1.7], completed_at=1.8,
-        status="ok", queue_time_ms=100.0,
+        status="ok", queue_time_ms=100.0, token_timing_exact=True,
     )
 
 
@@ -27,4 +27,3 @@ def test_jsonl_round_trip_and_parquet(tmp_path: Path) -> None:
     parquet = tmp_path / "requests.parquet"
     write_parquet(jsonl, parquet)
     assert parquet.exists() and parquet.stat().st_size > 0
-

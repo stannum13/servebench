@@ -25,6 +25,9 @@ def parse_vllm_metrics(text: str) -> dict[str, float | int]:
     preemptions = preemptions if preemptions is not None else _metric(text, "vllm:num_preemptions")
     if preemptions is not None:
         result["preemptions"] = int(preemptions)
+    waiting = _metric(text, "vllm:num_requests_waiting")
+    if waiting is not None:
+        result["backend_waiting"] = int(waiting)
     hits = _metric(text, "vllm:prefix_cache_hits_total")
     hits = hits if hits is not None else _metric(text, "vllm:prefix_cache_hits")
     queries = _metric(text, "vllm:prefix_cache_queries_total")

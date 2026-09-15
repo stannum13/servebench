@@ -23,8 +23,9 @@ flowchart LR
 ```
 
 The router is OpenAI-compatible at `/v1/completions` and `/v1/chat/completions`. The SLO policy
-uses queue depth, estimated prompt tokens, and KV pressure to admit, briefly delay, return an
-explicit HTTP 429, or select the least-pressured worker. `ROUTER_POLICY=fifo` is the baseline;
+uses assigned in-flight depth, vLLM's sampled waiting-request count, calibrated prompt tokens,
+and KV pressure to admit, briefly delay, return an explicit HTTP 429, or select the
+least-pressured worker. `ROUTER_POLICY=fifo` is the baseline;
 `ROUTER_POLICY=slo` enables the controller.
 
 For any network-accessible deployment, set a strong `ROUTER_API_KEY` and keep vLLM port 8000
@@ -72,14 +73,17 @@ paired with a fresh repeated baseline, changes one setting, writes confidence in
 
 ## Workloads and protocol
 
-- `short`: approximately 256 prompt tokens and 128 generated tokens.
-- `long-prefill`: approximately 4096 prompt tokens and 128 generated tokens.
-- `shared-prefix`: a byte-identical 3968-token prefix and a unique suffix.
+- `short`: 256 prompt tokens and 128 generated tokens.
+- `long-prefill`: 4096 prompt tokens and 128 generated tokens.
+- `shared-prefix`: an identical 3968-token prefix and a 128-token unique suffix.
 - `bursty`: Poisson background arrivals plus an instantaneous request spike.
 - `mixed`: deterministic weighted sampling of all workload classes.
 
-Seeds are isolated from global random state. First sweep concurrency geometrically until throughput
-flattens or p95 TTFT/queue time turns sharply, then refine around that transition. Independently vary
+Seeds are isolated from global random state. The load generator uses vLLM `/tokenize` to calibrate
+prompt lengths to the active `MODEL`, and requests token IDs in streaming responses so per-token
+timing is marked valid only when IDs are present. Set `TOKENIZER_URL` if vLLM is on another host.
+First sweep concurrency geometrically until throughput flattens and p95 TTFT turns sharply, then
+refine around that transition. If no transition is measured, the report says so. Independently vary
 max batched tokens, max sequences, prefix caching, chunked prefill, and BF16 versus AWQ. Run each
 candidate at least three times, bootstrap paired confidence intervals, and keep a scheduler change
 only when p95 TTFT improves while throughput stays at or above 95% of FIFO.
@@ -87,9 +91,14 @@ only when p95 TTFT improves while throughput stays at or above 95% of FIFO.
 ## Measurements and raw data
 
 Each request record contains scheduling, start, first-token, per-token, and completion timestamps;
-token counts; queue time; status/error; chosen worker; and optional KV, prefix-cache, preemption,
-GPU utilization, memory, and power snapshots. Derived summaries include p50/p95/p99 TTFT,
-inter-token latency, end-to-end latency, queue time, request and token throughput, and failures.
+actual and nominal token counts; client semaphore wait; router admission time; HTTP status/error;
+chosen worker; and the router's KV snapshot. Prometheus collects run-level vLLM queue and prefill
+latency, KV utilization, prefix hits, preemptions, and DCGM GPU utilization, memory, and power where
+available. Client semaphore wait is outside TTFT; router admission time and post-header TTFT are
+separate stages, while vLLM queue/pre-fill histogram means are run-level telemetry. Derived
+summaries include p50/p95/p99 TTFT, inter-token latency, end-to-end latency, request and token
+throughput, rejections, timeouts, and failures. GPU conclusions require verified vLLM and DCGM
+telemetry; mock and incomplete GPU rows cannot support optimization claims.
 
 Raw runs live under `results/<run-id>/requests.jsonl` and `results/<run-id>/requests.parquet` with a
 `summary.json` and run manifest. Large raw results should be uploaded as release artifacts or object
@@ -98,10 +107,12 @@ storage and linked from the report. `BENCH_STATE.md` is the append-only hypothes
 ## Key output graphs
 
 - [Saturation curve](figures/saturation.png): concurrency against throughput and p95 TTFT.
-- [Latency decomposition](figures/latency-decomposition.png): TTFT against queue contribution.
+- [Latency stages](figures/latency-decomposition.png): TTFT, router admission, and post-header TTFT
+  where measured; older runs show client wait separately and are labeled legacy.
 - [FIFO vs SLO scheduler](figures/scheduler-comparison.png): repeated policy comparison.
 
 Grafana is available on port 3000, Prometheus on 9090, the router on 8080, and vLLM on 8000. These
 operator ports bind to loopback by default. The `web` service is the only public bind; its generated
 figures and `REPORT.md` are suitable for publishing on `www.shivanknigam.com`, and a themed
 presentation layer can consume the same result schema later.
+If port 3000 is occupied, set `GRAFANA_HOST_PORT=3001` for the Compose command.

@@ -46,7 +46,7 @@ services:
     volumes:
       - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./dashboards:/var/lib/grafana/dashboards:ro
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:${GRAFANA_HOST_PORT:-3000}:3000"]
     depends_on: [prometheus]
   dcgm-exporter:
     image: nvcr.io/nvidia/k8s/dcgm-exporter:4.4.1-4.5.2-ubuntu22.04
@@ -66,6 +66,8 @@ services:
     entrypoint: ["servebench-loadgen"]
     environment:
       ROUTER_API_KEY: ${ROUTER_API_KEY:-}
+      MODEL: ${MODEL:-Qwen/Qwen2.5-7B-Instruct}
+      TOKENIZER_URL: http://vllm:8000
     command: ["--url", "http://router:8080", "--workload", "mixed", "--requests", "100", "--concurrency", "8", "--output", "/results/latest/requests.jsonl"]
     volumes: ["./results:/results"]
     depends_on:

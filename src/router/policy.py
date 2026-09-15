@@ -18,10 +18,11 @@ class WorkerState:
     name: str
     queue_depth: int
     kv_usage: float
+    backend_waiting: int = 0
 
     @property
     def pressure_score(self) -> float:
-        return self.queue_depth + self.kv_usage * 100
+        return self.queue_depth + self.backend_waiting * 2 + self.kv_usage * 100
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,7 +43,8 @@ class FifoPolicy:
         del request
         if not snapshot.workers:
             return Decision("reject", None, reason="no healthy workers")
-        return Decision("admit", snapshot.workers[0].name, reason="fifo")
+        worker = min(snapshot.workers, key=lambda item: item.queue_depth)
+        return Decision("admit", worker.name, reason="fifo")
 
 
 class SloPolicy:
@@ -82,7 +84,10 @@ class SloPolicy:
                 delay_seconds=delay,
                 reason=f"TTFT estimate {estimated_ttft_ms:.0f}ms exceeds SLO",
             )
-        if selected.queue_depth >= max(1, self.config.queue_limit // 8):
+        if (
+            selected.queue_depth >= max(1, self.config.queue_limit // 8)
+            or selected.backend_waiting >= max(1, self.config.queue_limit // 8)
+        ):
             delay = min(self.config.max_delay_ms / 1000, 0.025 + selected.queue_depth * 0.005)
             return Decision("delay", selected.name, delay_seconds=delay, reason="queue pressure")
         reason = "healthy alternate worker" if alternate else "within SLO pressure limits"

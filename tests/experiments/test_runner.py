@@ -5,8 +5,11 @@ import pytest
 from experiments.runner import (
     build_refinement_specs,
     build_run_specs,
+    classify_evidence,
+    compare_and_record_policies,
     compare_policies,
     detect_saturation,
+    loadgen_command,
     validate_repeats,
 )
 from experiments.state import append_state
@@ -36,6 +39,16 @@ def test_state_ledger_records_hypothesis_and_decision(tmp_path: Path) -> None:
     )
     text = path.read_text()
     assert "queue" in text and "delay long prompts" in text and "keep" in text
+
+
+def test_state_ledger_records_measured_confidence_intervals(tmp_path: Path) -> None:
+    path = tmp_path / "BENCH_STATE.md"
+    append_state(
+        path, run_id="r2", bottleneck="TTFT", hypothesis="delay long prompts",
+        variable="policy", decision="revert",
+        measurement="p95 TTFT delta: -5.0 ms, 95% CI [-10.0, 2.0] ms",
+    )
+    assert "95% CI [-10.0, 2.0]" in path.read_text()
 
 
 def test_baseline_specs_repeat_every_concurrency_with_distinct_seeds() -> None:
@@ -71,6 +84,27 @@ def test_saturation_detects_throughput_plateau_with_ttft_growth() -> None:
     assert transition.refinement_concurrency == 3
 
 
+def test_saturation_is_not_invented_when_throughput_keeps_rising() -> None:
+    rows = [
+        {"concurrency": 1, "requests_per_second": 2, "p95_ttft_ms": 100},
+        {"concurrency": 2, "requests_per_second": 4, "p95_ttft_ms": 110},
+        {"concurrency": 4, "requests_per_second": 8, "p95_ttft_ms": 120},
+    ]
+    transition = detect_saturation(rows)
+    assert transition.saturation_concurrency is None
+    assert transition.refinement_concurrency is None
+
+
+def test_saturation_handles_levels_without_first_tokens() -> None:
+    rows = [
+        {"concurrency": 1, "requests_per_second": 2, "p95_ttft_ms": 100},
+        {"concurrency": 2, "requests_per_second": 4, "p95_ttft_ms": 140},
+        {"concurrency": 4, "requests_per_second": 0, "p95_ttft_ms": None},
+    ]
+    transition = detect_saturation(rows)
+    assert transition.saturation_concurrency is None
+
+
 def test_refinement_specs_measure_detected_midpoint() -> None:
     config = {
         "name": "baseline", "workload": "mixed", "seed": 10, "repeats": 3,
@@ -99,3 +133,58 @@ def test_refinement_specs_are_opt_in() -> None:
         {"concurrency": 4, "requests_per_second": 4.0, "p95_ttft_ms": 240},
     ]
     assert build_refinement_specs(config, rows) == []
+
+
+def test_suite_command_passes_model_to_loadgen() -> None:
+    spec = build_run_specs({
+        "name": "awq", "seed": 1, "repeats": 3, "requests": 10,
+        "concurrency": {"coarse": [1]},
+    })[0]
+    command = loadgen_command(
+        spec, {"model": "quantized/model"}, "http://router", Path("results/requests.jsonl")
+    )
+    assert command[command.index("--model") + 1] == "quantized/model"
+
+
+def test_gpu_evidence_requires_cache_and_dcgm_telemetry() -> None:
+    assert classify_evidence("gpu", {"kv_cache_peak": 0.8}) == "unknown"
+    assert classify_evidence("gpu", {
+        "kv_cache_peak": 0.8,
+        "gpu_utilization_peak": 92,
+        "gpu_memory_peak_mib": 24000,
+    }) == "unknown"
+    assert classify_evidence("gpu", {
+        "kv_cache_peak": 0.8,
+        "gpu_utilization_peak": 92,
+        "gpu_memory_peak_mib": 24000,
+        "vllm_queue_mean_ms": 30,
+        "vllm_prefill_mean_ms": 55,
+    }) == "gpu"
+    assert classify_evidence("mock", {
+        "kv_cache_peak": 0.8,
+        "gpu_utilization_peak": 92,
+        "gpu_memory_peak_mib": 24000,
+    }) == "mock"
+
+
+def test_all_rejected_policy_run_is_inconclusive_not_a_crash(tmp_path: Path, monkeypatch) -> None:
+    entries = []
+    def capture_state(*args, **kwargs):
+        entries.append(kwargs)
+    monkeypatch.setattr("experiments.runner.append_state", capture_state)
+    rows = [
+        {"policy": "fifo", "concurrency": 8, "repeat": repeat,
+         "p95_ttft_ms": 100, "requests_per_second": 10}
+        for repeat in range(3)
+    ] + [
+        {"policy": "slo", "concurrency": 8, "repeat": repeat,
+         "p95_ttft_ms": None, "requests_per_second": 0}
+        for repeat in range(3)
+    ]
+    compare_and_record_policies(
+        {"name": "scheduler"}, rows, tmp_path, "gpu"
+    )
+    import json
+    comparison = json.loads((tmp_path / "comparison.json").read_text())
+    assert comparison["keep"] is False
+    assert entries[0]["decision"] == "inconclusive"

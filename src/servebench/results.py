@@ -20,15 +20,21 @@ class RequestMeasurement(BaseModel):
     workload: str
     policy: str
     prompt_tokens: int = Field(ge=0)
+    nominal_prompt_tokens: int | None = Field(default=None, ge=0)
     output_tokens: int = Field(ge=0)
     scheduled_at: float
     started_at: float
     first_token_at: float | None = None
+    headers_received_at: float | None = None
     token_timestamps: list[float] = Field(default_factory=list)
+    token_timing_exact: bool = False
     completed_at: float
     status: Literal["ok", "error", "timeout", "rejected"]
+    http_status_code: int | None = None
     error: str | None = None
     queue_time_ms: float | None = None
+    client_queue_time_ms: float | None = None
+    router_admission_ms: float | None = None
     worker: str | None = None
     kv_cache_usage: float | None = None
     prefix_cache_hit_rate: float | None = None
@@ -46,7 +52,16 @@ class RequestMeasurement(BaseModel):
 
     @computed_field
     @property
+    def post_header_ttft_ms(self) -> float | None:
+        if self.first_token_at is None or self.headers_received_at is None:
+            return None
+        return round((self.first_token_at - self.headers_received_at) * 1000, 6)
+
+    @computed_field
+    @property
     def inter_token_latencies_ms(self) -> list[float]:
+        if not self.token_timing_exact:
+            return []
         return [
             round((current - previous) * 1000, 6)
             for previous, current in pairwise(self.token_timestamps)

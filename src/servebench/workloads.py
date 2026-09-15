@@ -16,7 +16,7 @@ WorkloadKind = Literal["short", "long-prefill", "shared-prefix", "bursty", "mixe
 class RequestSpec:
     request_id: str
     kind: str
-    prompt: str
+    prompt: str | list[int]
     prompt_tokens: int
     max_tokens: int = 128
 

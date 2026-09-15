@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import time
 from dataclasses import asdict, dataclass
@@ -43,7 +44,7 @@ class RunSpec:
 
 @dataclass(frozen=True, slots=True)
 class SaturationTransition:
-    saturation_concurrency: int
+    saturation_concurrency: int | None
     refinement_concurrency: int | None
 
 
@@ -114,6 +115,34 @@ def build_refinement_specs(
     return build_run_specs(refined)
 
 
+def loadgen_command(
+    spec: RunSpec, config: dict[str, object], url: str, output: Path
+) -> list[str]:
+    command = [
+        "uv", "run", "servebench-loadgen", "--url", url,
+        "--workload", spec.workload, "--requests", str(spec.requests),
+        "--concurrency", str(spec.concurrency), "--seed", str(spec.seed),
+        "--policy", spec.policy, "--output", str(output),
+    ]
+    if model := config.get("model"):
+        command.extend(["--model", str(model)])
+    if tokenizer_url := config.get("tokenizer_url", os.getenv("TOKENIZER_URL")):
+        command.extend(["--tokenizer-url", str(tokenizer_url)])
+    if request_rate := config.get("request_rate"):
+        command.extend(["--request-rate", str(request_rate)])
+    return command
+
+
+def classify_evidence(requested: str, summary: dict[str, object]) -> str:
+    if requested == "mock":
+        return "mock"
+    required = (
+        "kv_cache_peak", "gpu_utilization_peak", "gpu_memory_peak_mib",
+        "vllm_queue_mean_ms", "vllm_prefill_mean_ms",
+    )
+    return "gpu" if all(summary.get(name) is not None for name in required) else "unknown"
+
+
 def detect_saturation(rows: list[dict[str, float]]) -> SaturationTransition:
     grouped: dict[int, list[dict[str, float]]] = {}
     for row in rows:
@@ -124,16 +153,25 @@ def detect_saturation(rows: list[dict[str, float]]) -> SaturationTransition:
     medians = {}
     for level, values in grouped.items():
         ordered_rps = sorted(item["requests_per_second"] for item in values)
-        ordered_ttft = sorted(item["p95_ttft_ms"] for item in values)
-        medians[level] = (ordered_rps[len(ordered_rps) // 2], ordered_ttft[len(ordered_ttft) // 2])
-    saturation = levels[-1]
+        ordered_ttft = sorted(
+            item["p95_ttft_ms"] for item in values
+            if item["p95_ttft_ms"] is not None
+        )
+        ttft = ordered_ttft[len(ordered_ttft) // 2] if ordered_ttft else None
+        medians[level] = (ordered_rps[len(ordered_rps) // 2], ttft)
+    saturation: int | None = None
     for previous, current in pairwise(levels):
         previous_rps, previous_ttft = medians[previous]
         current_rps, current_ttft = medians[current]
         gain = (current_rps - previous_rps) / max(previous_rps, 1e-9)
-        if gain < 0.10 and current_ttft > previous_ttft * 1.5:
+        if (
+            current_ttft is not None and previous_ttft is not None
+            and gain < 0.10 and current_ttft > previous_ttft * 1.5
+        ):
             saturation = current
             break
+    if saturation is None:
+        return SaturationTransition(None, None)
     index = levels.index(saturation)
     refinement = (levels[index - 1] + saturation) // 2 if index > 0 else None
     if refinement in levels:
@@ -155,14 +193,7 @@ def execute_suite(
     def run(spec: RunSpec) -> dict[str, object]:
         output_dir = results_root / spec.suite / spec.run_id
         output = output_dir / "requests.jsonl"
-        command = [
-            "uv", "run", "servebench-loadgen", "--url", url,
-            "--workload", spec.workload, "--requests", str(spec.requests),
-            "--concurrency", str(spec.concurrency), "--seed", str(spec.seed),
-            "--policy", spec.policy, "--output", str(output),
-        ]
-        if request_rate := config.get("request_rate"):
-            command.extend(["--request-rate", str(request_rate)])
+        command = loadgen_command(spec, config, url, output)
         started_at = time.time()
         subprocess.run(command, check=True)
         completed_at = time.time()
@@ -173,7 +204,8 @@ def execute_suite(
             "run_id": spec.run_id, "policy": spec.policy, "repeat": spec.repeat,
             "seed": spec.seed, "concurrency": spec.concurrency,
             "p95_ttft_ms": summary["ttft_ms"]["p95"],
-            "evidence_kind": evidence_kind,
+            "evidence_kind": classify_evidence(evidence_kind, summary),
+            "evidence_requested": evidence_kind,
         })
         return summary
 
@@ -198,7 +230,11 @@ def execute_suite(
         append_state(
             Path("BENCH_STATE.md"),
             run_id=str(config["name"]),
-            bottleneck=f"transition near concurrency {transition.saturation_concurrency}",
+            bottleneck=(
+                f"transition near concurrency {transition.saturation_concurrency}"
+                if transition.saturation_concurrency is not None
+                else f"saturation not observed through concurrency {max(levels)}"
+            ),
             hypothesis=(
                 "queue, KV, and GPU telemetry at the transition identify "
                 "the limiting resource"
@@ -208,7 +244,8 @@ def execute_suite(
         )
     policies = {str(row["policy"]) for row in rows}
     if {"fifo", "slo"} <= policies:
-        compare_and_record_policies(config, rows, suite_dir, evidence_kind)
+        verified = "gpu" if all(row["evidence_kind"] == "gpu" for row in rows) else "unknown"
+        compare_and_record_policies(config, rows, suite_dir, verified)
     return rows
 
 
@@ -242,6 +279,24 @@ def compare_and_record_policies(
         (row for row in rows if row["policy"] == "slo" and row["concurrency"] == level),
         key=lambda row: int(row["repeat"]),
     )
+    if any(row.get("p95_ttft_ms") is None for row in fifo + slo):
+        (suite_dir / "comparison.json").write_text(
+            json.dumps({
+                "keep": False,
+                "ttft_delta_ms": None,
+                "throughput_ratio": None,
+                "reason": "one or more policy runs had no successful first token",
+            }, indent=2) + "\n", encoding="utf-8",
+        )
+        append_state(
+            Path("BENCH_STATE.md"),
+            run_id=str(config["name"]),
+            bottleneck="one or more policies produced no successful first token",
+            hypothesis="SLO admission reduces p95 TTFT with at least 95% FIFO throughput",
+            variable="scheduling policy",
+            decision="inconclusive",
+        )
+        return
     comparison = compare_policies(
         [float(row["p95_ttft_ms"]) for row in fifo],
         [float(row["p95_ttft_ms"]) for row in slo],
@@ -261,6 +316,15 @@ def compare_and_record_policies(
         hypothesis="SLO admission reduces p95 TTFT while preserving 95% of FIFO throughput",
         variable="scheduling policy",
         decision=decision,
+        measurement=(
+            "p95 TTFT delta: "
+            f"{comparison.ttft_delta_ms.estimate:.2f} ms, 95% CI "
+            f"[{comparison.ttft_delta_ms.low:.2f}, {comparison.ttft_delta_ms.high:.2f}] ms; "
+            "throughput ratio: "
+            f"{comparison.throughput_ratio.estimate:.3f}, 95% CI "
+            f"[{comparison.throughput_ratio.low:.3f}, "
+            f"{comparison.throughput_ratio.high:.3f}]"
+        ),
     )
 
 
