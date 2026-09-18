@@ -54,6 +54,24 @@ def test_run_telemetry_queries_aggregate_multi_worker_series() -> None:
     assert any("max(max_over_time(DCGM_FI_DEV_GPU_UTIL" in value for value in expressions)
 
 
+def test_short_run_does_not_extend_telemetry_window_before_start() -> None:
+    expressions = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        expressions.append(request.url.params["query"])
+        return httpx.Response(200, json={
+            "status": "success", "data": {"result": []},
+        })
+
+    with PrometheusTelemetry(
+        "http://prometheus", transport=httpx.MockTransport(handler)
+    ) as telemetry:
+        telemetry.collect(100.8, 102.0)
+    assert expressions
+    assert all("[1200ms" in expression for expression in expressions)
+    assert all("[10s]" not in expression for expression in expressions)
+
+
 def test_unaggregated_multiple_series_are_not_silently_first_only() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={

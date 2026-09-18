@@ -44,6 +44,15 @@ def test_slo_rejects_when_every_worker_is_hard_overloaded() -> None:
     assert "overload" in decision.reason
 
 
+def test_slo_rejects_when_pressure_telemetry_is_unknown() -> None:
+    decision = SloPolicy().decide(
+        RequestFeatures(256),
+        snapshot(WorkerState("a", 0, 0.0, pressure_fresh=False)),
+    )
+    assert decision.action == "reject"
+    assert "telemetry" in decision.reason
+
+
 def test_slo_protects_kv_from_long_prompt() -> None:
     decision = SloPolicy().decide(RequestFeatures(4096), snapshot(WorkerState("a", 5, 0.82)))
     assert decision.action == "delay"

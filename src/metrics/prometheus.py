@@ -15,6 +15,11 @@ class RouterMetrics:
             "servebench_backend_waiting_requests", "vLLM waiting requests sampled per worker",
             ["worker"], registry=self.registry,
         )
+        self.pressure_fresh = Gauge(
+            "servebench_worker_pressure_telemetry_fresh",
+            "Whether KV and backend waiting telemetry is within its freshness TTL",
+            ["worker"], registry=self.registry,
+        )
         self.kv = Gauge(
             "servebench_worker_kv_cache_usage_ratio", "Worker KV cache utilization", ["worker"],
             registry=self.registry,

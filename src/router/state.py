@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -22,40 +24,66 @@ class WorkerRuntime:
     kv_usage: float = 0.0
     prefix_cache_hit_rate: float | None = None
     preemptions: int = 0
+    pressure_updated_at: float | None = None
 
 
 class RouterState:
-    def __init__(self, urls: list[str]) -> None:
+    def __init__(
+        self,
+        urls: list[str],
+        *,
+        clock: Callable[[], float] = time.monotonic,
+        telemetry_ttl_seconds: float = 5.0,
+    ) -> None:
         self.workers = {
             f"worker-{index}": WorkerRuntime(f"worker-{index}", url.rstrip("/"))
             for index, url in enumerate(urls)
         }
+        self._clock = clock
+        self._telemetry_ttl_seconds = telemetry_ttl_seconds
         self._lock = asyncio.Lock()
 
     def snapshot(self) -> RouterSnapshot:
         return RouterSnapshot(
             [
-                WorkerState(item.name, item.queue_depth, item.kv_usage, item.backend_waiting)
+                WorkerState(
+                    item.name,
+                    item.queue_depth,
+                    item.kv_usage,
+                    item.backend_waiting,
+                    pressure_fresh=self.pressure_is_fresh(item.name),
+                )
                 for item in self.workers.values()
             ]
+        )
+
+    def pressure_is_fresh(self, worker: str) -> bool:
+        updated_at = self.workers[worker].pressure_updated_at
+        return (
+            updated_at is not None
+            and self._clock() - updated_at <= self._telemetry_ttl_seconds
         )
 
     def update_metrics(
         self,
         worker: str,
         *,
-        kv_usage: float,
+        kv_usage: float | None = None,
         prefix_cache_hit_rate: float | None = None,
         preemptions: int | None = None,
         backend_waiting: int | None = None,
     ) -> None:
         runtime = self.workers[worker]
-        runtime.kv_usage = kv_usage
-        runtime.prefix_cache_hit_rate = prefix_cache_hit_rate
+        if kv_usage is not None:
+            runtime.kv_usage = kv_usage
+        if prefix_cache_hit_rate is not None:
+            runtime.prefix_cache_hit_rate = prefix_cache_hit_rate
         if preemptions is not None:
             runtime.preemptions = preemptions
         if backend_waiting is not None:
             runtime.backend_waiting = max(0, backend_waiting)
+        if kv_usage is not None and backend_waiting is not None:
+            runtime.pressure_updated_at = self._clock()
 
     async def acquire(self, worker: str) -> None:
         async with self._lock:

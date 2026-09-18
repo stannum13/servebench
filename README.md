@@ -27,6 +27,10 @@ uses assigned in-flight depth, vLLM's sampled waiting-request count, calibrated 
 and KV pressure to admit, briefly delay, return an explicit HTTP 429, or select the
 least-pressured worker. `ROUTER_POLICY=fifo` is the baseline;
 `ROUTER_POLICY=slo` enables the controller.
+SLO mode requires a recent sample containing both KV utilization and vLLM waiting requests. It
+rejects conservatively when pressure telemetry has never arrived or is older than five seconds;
+`servebench_worker_pressure_telemetry_fresh` exposes that state to Prometheus. FIFO remains
+available even when pressure telemetry is unavailable.
 
 For any network-accessible deployment, set a strong `ROUTER_API_KEY` and keep vLLM port 8000
 private behind a firewall or reverse proxy. Only the read-only `web` service should be published at
@@ -49,6 +53,11 @@ make smoke
 
 The mock path verifies HTTP streaming, timing capture, routing, persistence, and observability. It
 is not valid evidence about vLLM, KV cache, GPU saturation, or scheduler quality.
+
+The read-only results service exposes `/api/runs`, `/api/status`, `/report`, and `/figures/*` for a
+future themed frontend. Its status endpoint declares GPU evidence only when the run includes the
+required vLLM queue/prefill, KV-cache, and DCGM utilization/memory telemetry. A partial result file
+is omitted from `/api/runs` and counted in `invalid_result_files` instead of taking the site down.
 
 Common commands:
 

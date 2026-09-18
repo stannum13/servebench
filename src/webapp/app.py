@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 from pathlib import Path
 
@@ -24,6 +25,49 @@ INDEX = """<!doctype html>
 'GPU evidence available':'GPU evidence pending';document.querySelector('#runs').textContent=
 JSON.stringify(r,null,2)});</script></body></html>"""
 
+REQUIRED_GPU_FIELDS = (
+    "kv_cache_peak",
+    "gpu_utilization_peak",
+    "gpu_memory_peak_mib",
+    "vllm_queue_mean_ms",
+    "vllm_prefill_mean_ms",
+)
+
+
+def _has_gpu_evidence(record: dict[str, object]) -> bool:
+    values = [record.get(field) for field in REQUIRED_GPU_FIELDS]
+    numeric = all(
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+        and value >= 0
+        for value in values
+    )
+    return (
+        record.get("evidence_kind") == "gpu"
+        and isinstance(record.get("run_id"), str)
+        and bool(record["run_id"])
+        and numeric
+        and float(record["kv_cache_peak"]) <= 1
+        and float(record["gpu_utilization_peak"]) <= 100
+    )
+
+
+def _load_runs(results_dir: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    invalid_files = 0
+    for path in sorted(results_dir.glob("*/runs.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            invalid_files += 1
+            continue
+        if not isinstance(payload, list):
+            invalid_files += 1
+            continue
+        records.extend(item for item in payload if isinstance(item, dict))
+    return records, invalid_files
+
 
 def create_app(results_dir: Path, report_path: Path, figures_dir: Path) -> FastAPI:
     app = FastAPI(title="servebench results", docs_url=None, redoc_url=None)
@@ -36,18 +80,18 @@ def create_app(results_dir: Path, report_path: Path, figures_dir: Path) -> FastA
 
     @app.get("/api/runs")
     async def runs() -> list[dict[str, object]]:
-        records: list[dict[str, object]] = []
-        for path in sorted(results_dir.glob("*/runs.json")):
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            if isinstance(payload, list):
-                records.extend(item for item in payload if isinstance(item, dict))
+        records, _ = _load_runs(results_dir)
         return records
 
     @app.get("/api/status")
     async def status() -> dict[str, object]:
-        records = await runs()
-        gpu_evidence = any(record.get("evidence_kind") == "gpu" for record in records)
-        return {"gpu_evidence": gpu_evidence, "runs": len(records)}
+        records, invalid_files = _load_runs(results_dir)
+        gpu_evidence = any(_has_gpu_evidence(record) for record in records)
+        return {
+            "gpu_evidence": gpu_evidence,
+            "runs": len(records),
+            "invalid_result_files": invalid_files,
+        }
 
     @app.get("/report", response_class=PlainTextResponse)
     async def report() -> str:

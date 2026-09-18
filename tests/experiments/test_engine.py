@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,7 @@ from experiments.engine import (
     compare_engine_variant,
     compose_environment,
     engine_evidence_verified,
+    execute_engine_sweeps,
 )
 
 
@@ -82,3 +84,60 @@ def test_engine_candidate_cannot_be_kept_with_missing_gpu_or_first_tokens() -> N
     assert engine_evidence_verified([complete], [complete]) is True
     assert engine_evidence_verified([complete], [{**complete, "evidence_kind": "unknown"}]) is False
     assert engine_evidence_verified([complete], [{**complete, "p95_ttft_ms": None}]) is False
+
+
+def test_each_engine_candidate_gets_a_fresh_named_baseline(
+    tmp_path: Path, monkeypatch
+) -> None:
+    import yaml
+
+    config = {
+        "seed": 1, "repeats": 3, "requests": 2,
+        "engine_baseline": baseline(),
+        "independent_sweeps": {"max_num_seqs": [128, 512]},
+        "quantized_model": "quant/model",
+    }
+    config_path = tmp_path / "baseline.yaml"
+    config_path.write_text(yaml.safe_dump(config))
+    calls: list[str] = []
+    events: list[tuple[str, str]] = []
+
+    def fake_suite(name, *args):
+        calls.append(name)
+        events.append(("suite", name))
+        result_dir = tmp_path / "results" / f"engine-{name}"
+        result_dir.mkdir(parents=True)
+        return [
+            {
+                "repeat": repeat, "evidence_kind": "gpu", "p95_ttft_ms": 100,
+                "requests_per_second": 10,
+            }
+            for repeat in range(3)
+        ]
+
+    monkeypatch.setattr(
+        "experiments.engine.restart_vllm",
+        lambda environment, *args: events.append(("restart", environment["MAX_SEQS"])),
+    )
+    monkeypatch.setattr("experiments.engine._execute_variant_suite", fake_suite)
+    monkeypatch.setattr("experiments.engine.append_state", lambda *args, **kwargs: None)
+    monkeypatch.setattr("experiments.runner.refresh_report_input", lambda *args: None)
+    execute_engine_sweeps(
+        config_path, 8, "http://router", "http://prometheus", "http://vllm/health",
+        tmp_path / "results",
+    )
+    assert calls == [
+        "baseline-for-max_num_seqs-128", "max_num_seqs-128",
+        "baseline-for-max_num_seqs-512", "max_num_seqs-512",
+    ]
+    assert events == [
+        ("restart", "256"), ("suite", "baseline-for-max_num_seqs-128"),
+        ("restart", "128"), ("suite", "max_num_seqs-128"),
+        ("restart", "256"), ("suite", "baseline-for-max_num_seqs-512"),
+        ("restart", "512"), ("suite", "max_num_seqs-512"),
+        ("restart", "256"),
+    ]
+    decision = json.loads(
+        (tmp_path / "results/engine-max_num_seqs-128/decision.json").read_text()
+    )
+    assert decision["baseline_suite"] == "engine-baseline-for-max_num_seqs-128"

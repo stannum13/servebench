@@ -144,13 +144,14 @@ def execute_engine_sweeps(
     baseline_environment = compose_environment(baseline, model, quantized)
     rows: list[dict[str, object]] = []
     try:
-        restart_vllm(baseline_environment, health_url)
-        baseline_rows = _execute_variant_suite(
-            "baseline", None, baseline, config, saturation_concurrency,
-            router_url, prometheus_url, results_root, model,
-        )
-        rows.extend(baseline_rows)
         for variant in variants:
+            restart_vllm(baseline_environment, health_url)
+            baseline_name = f"baseline-for-{variant.name}"
+            baseline_rows = _execute_variant_suite(
+                baseline_name, None, baseline, config,
+                saturation_concurrency, router_url, prometheus_url, results_root, model,
+            )
+            rows.extend(baseline_rows)
             restart_vllm(compose_environment(variant.settings, model, quantized), health_url)
             variant_rows = _execute_variant_suite(
                 variant.name, variant.variable, variant.settings, config,
@@ -177,6 +178,8 @@ def execute_engine_sweeps(
             variant_dir = results_root / f"engine-{variant.name}"
             (variant_dir / "decision.json").write_text(
                 json.dumps({
+                    "baseline_suite": f"engine-{baseline_name}",
+                    "candidate_suite": f"engine-{variant.name}",
                     "keep": bool(verified and comparison and comparison.keep),
                     "ttft_delta_ms": (
                         asdict(comparison.ttft_delta_ms) if comparison else None

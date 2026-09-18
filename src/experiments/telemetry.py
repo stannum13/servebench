@@ -27,8 +27,9 @@ class PrometheusTelemetry:
         return value if math.isfinite(value) else None
 
     def collect(self, started_at: float, completed_at: float) -> dict[str, float | None]:
-        window = max(10, math.ceil(completed_at - started_at))
-        span = f"[{window}s]"
+        window_ms = max(1, math.floor((completed_at - started_at) * 1000))
+        span = f"[{window_ms}ms]"
+        subquery_step_ms = min(5000, window_ms)
 
         def histogram_mean_ms(name: str) -> str:
             numerator = f"sum(increase({name}_sum{span}))"
@@ -54,7 +55,8 @@ class PrometheusTelemetry:
             "gpu_memory_peak_mib": f"max(max_over_time(DCGM_FI_DEV_FB_USED{span}))",
             "gpu_power_average_watts": f"sum(avg_over_time(DCGM_FI_DEV_POWER_USAGE{span}))",
             "vllm_queue_peak": (
-                f"max_over_time((sum(vllm:num_requests_waiting))[{window}s:5s])"
+                "max_over_time((sum(vllm:num_requests_waiting))"
+                f"[{window_ms}ms:{subquery_step_ms}ms])"
             ),
             "vllm_queue_mean_ms": histogram_mean_ms("vllm:request_queue_time_seconds"),
             "vllm_prefill_mean_ms": histogram_mean_ms("vllm:request_prefill_time_seconds"),

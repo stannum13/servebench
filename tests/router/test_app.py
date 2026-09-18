@@ -44,7 +44,7 @@ def test_streaming_sse_is_preserved() -> None:
 def test_slo_returns_429_when_kv_is_exhausted() -> None:
     config = BenchConfig.model_validate({"router": {"policy": "slo"}})
     state = RouterState(["http://worker-0:8000"])
-    state.update_metrics("worker-0", kv_usage=0.99)
+    state.update_metrics("worker-0", kv_usage=0.99, backend_waiting=0)
     response = TestClient(create_app(config, backend=FakeBackend(), state=state)).post(
         "/v1/completions", json={"prompt": "hello"}
     )
@@ -55,7 +55,7 @@ def test_slo_returns_429_when_kv_is_exhausted() -> None:
 def test_benchmark_header_selects_slo_against_fifo_default() -> None:
     config = BenchConfig.model_validate({"router": {"allow_policy_override": True}})
     state = RouterState(["http://worker-0:8000"])
-    state.update_metrics("worker-0", kv_usage=0.99)
+    state.update_metrics("worker-0", kv_usage=0.99, backend_waiting=0)
     response = TestClient(create_app(config, backend=FakeBackend(), state=state)).post(
         "/v1/completions",
         json={"prompt": "hello"},
@@ -81,6 +81,7 @@ def test_metrics_distinguish_assigned_requests_from_backend_waiting() -> None:
         "/metrics"
     ).text
     assert 'servebench_backend_waiting_requests{worker="worker-0"} 7.0' in metrics
+    assert 'servebench_worker_pressure_telemetry_fresh{worker="worker-0"} 1.0' in metrics
 
 
 def test_vllm_metrics_parser_extracts_cache_and_preemptions() -> None:
@@ -95,6 +96,23 @@ def test_vllm_metrics_parser_extracts_cache_and_preemptions() -> None:
         "kv_usage": 0.83, "preemptions": 7, "prefix_cache_hit_rate": 0.75,
         "backend_waiting": 5,
     }
+
+
+def test_missing_metric_sample_does_not_reset_known_worker_pressure() -> None:
+    now = [0.0]
+    state = RouterState(
+        ["http://worker"], clock=lambda: now[0], telemetry_ttl_seconds=5
+    )
+    assert state.snapshot().workers[0].pressure_fresh is False
+    state.update_metrics("worker-0", kv_usage=0.81, backend_waiting=5)
+    assert state.snapshot().workers[0].pressure_fresh is True
+    now[0] = 4
+    state.update_metrics("worker-0")
+    worker = state.workers["worker-0"]
+    assert worker.kv_usage == 0.81
+    assert worker.backend_waiting == 5
+    now[0] = 6
+    assert state.snapshot().workers[0].pressure_fresh is False
 
 
 def test_router_requires_bearer_token_when_configured() -> None:
@@ -115,7 +133,7 @@ async def test_delayed_request_rechecks_kv_hard_limit() -> None:
         "kv_hard_limit": 0.95,
     }})
     state = RouterState(["http://worker-0:8000"])
-    state.update_metrics("worker-0", kv_usage=0.81)
+    state.update_metrics("worker-0", kv_usage=0.81, backend_waiting=0)
     app = create_app(config, backend=FakeBackend(), state=state)
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
@@ -123,7 +141,7 @@ async def test_delayed_request_rechecks_kv_hard_limit() -> None:
             "/v1/completions", json={"prompt": "hello", "stream": False}
         ))
         await asyncio.sleep(0.01)
-        state.update_metrics("worker-0", kv_usage=0.99)
+        state.update_metrics("worker-0", kv_usage=0.99, backend_waiting=0)
         response = await pending
     assert response.status_code == 429
 
@@ -140,7 +158,7 @@ async def test_concurrent_delayed_requests_do_not_overbook_queue_limit() -> None
         "policy": "slo", "queue_limit": 1, "max_delay_ms": 100,
     }})
     state = RouterState(["http://worker-0:8000"])
-    state.update_metrics("worker-0", kv_usage=0.81)
+    state.update_metrics("worker-0", kv_usage=0.81, backend_waiting=0)
     app = create_app(config, backend=SlowBackend(), state=state)
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:

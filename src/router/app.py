@@ -60,10 +60,19 @@ def create_app(
                         values = await fetch(worker)
                         router_state.update_metrics(
                             worker,
-                            kv_usage=float(values.get("kv_usage", 0)),
+                            kv_usage=(
+                                float(values["kv_usage"])
+                                if "kv_usage" in values else None
+                            ),
                             prefix_cache_hit_rate=values.get("prefix_cache_hit_rate"),
-                            preemptions=int(values.get("preemptions", 0)),
-                            backend_waiting=int(values.get("backend_waiting", 0)),
+                            preemptions=(
+                                int(values["preemptions"])
+                                if "preemptions" in values else None
+                            ),
+                            backend_waiting=(
+                                int(values["backend_waiting"])
+                                if "backend_waiting" in values else None
+                            ),
                         )
                     except Exception:  # metric loss must not stop inference
                         continue
@@ -97,6 +106,9 @@ def create_app(
         for worker in router_state.workers.values():
             instruments.queue.labels(worker.name).set(worker.queue_depth)
             instruments.backend_waiting.labels(worker.name).set(worker.backend_waiting)
+            instruments.pressure_fresh.labels(worker.name).set(
+                int(router_state.pressure_is_fresh(worker.name))
+            )
             instruments.kv.labels(worker.name).set(worker.kv_usage)
             if worker.prefix_cache_hit_rate is not None:
                 instruments.prefix_hits.labels(worker.name).set(worker.prefix_cache_hit_rate)

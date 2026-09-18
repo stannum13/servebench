@@ -19,6 +19,7 @@ class WorkerState:
     queue_depth: int
     kv_usage: float
     backend_waiting: int = 0
+    pressure_fresh: bool = True
 
     @property
     def pressure_score(self) -> float:
@@ -54,9 +55,12 @@ class SloPolicy:
     def decide(self, request: RequestFeatures, snapshot: RouterSnapshot) -> Decision:
         if not snapshot.workers:
             return Decision("reject", None, reason="overload: no healthy workers")
+        fresh = [worker for worker in snapshot.workers if worker.pressure_fresh]
+        if not fresh:
+            return Decision("reject", None, reason="overload: pressure telemetry unavailable")
         viable = [
             worker
-            for worker in snapshot.workers
+            for worker in fresh
             if worker.queue_depth < self.config.queue_limit
             and worker.kv_usage < self.config.kv_hard_limit
         ]
