@@ -24,6 +24,7 @@ class PolicyComparison:
     keep: bool
     ttft_delta_ms: ConfidenceInterval
     throughput_ratio: ConfidenceInterval
+    completion_ratio: ConfidenceInterval
     reason: str
 
 
@@ -59,8 +60,16 @@ def compare_policies(
     fifo_throughput: list[float],
     slo_throughput: list[float],
     throughput_floor: float = 0.95,
+    *,
+    fifo_completion: list[float] | None = None,
+    slo_completion: list[float] | None = None,
 ) -> PolicyComparison:
-    lengths = {len(fifo_ttft), len(slo_ttft), len(fifo_throughput), len(slo_throughput)}
+    fifo_completion = fifo_completion or [1.0] * len(fifo_ttft)
+    slo_completion = slo_completion or [1.0] * len(slo_ttft)
+    lengths = {
+        len(fifo_ttft), len(slo_ttft), len(fifo_throughput), len(slo_throughput),
+        len(fifo_completion), len(slo_completion),
+    }
     if len(lengths) != 1:
         raise ValueError("policy measurements must be paired")
     repeats = lengths.pop()
@@ -68,13 +77,22 @@ def compare_policies(
     ttft_delta = bootstrap_ci([new - old for old, new in zip(fifo_ttft, slo_ttft, strict=True)])
     ratios = [new / old for old, new in zip(fifo_throughput, slo_throughput, strict=True)]
     throughput_ratio = bootstrap_ci(ratios, seed=1)
-    keep = ttft_delta.high < 0 and throughput_ratio.low >= throughput_floor
-    reason = (
-        "TTFT improved within throughput constraint"
-        if keep
-        else "confidence or throughput constraint failed"
+    completion_ratios = [
+        new / old for old, new in zip(fifo_completion, slo_completion, strict=True)
+    ]
+    completion_ratio = bootstrap_ci(completion_ratios, seed=2)
+    keep = (
+        ttft_delta.high < 0
+        and throughput_ratio.low >= throughput_floor
+        and completion_ratio.low >= throughput_floor
     )
-    return PolicyComparison(keep, ttft_delta, throughput_ratio, reason)
+    if keep:
+        reason = "TTFT improved within throughput constraint and completion constraint"
+    elif completion_ratio.low < throughput_floor:
+        reason = "completion-rate constraint failed"
+    else:
+        reason = "confidence or throughput constraint failed"
+    return PolicyComparison(keep, ttft_delta, throughput_ratio, completion_ratio, reason)
 
 
 def build_run_specs(config: dict[str, object]) -> list[RunSpec]:
@@ -279,12 +297,27 @@ def compare_and_record_policies(
         (row for row in rows if row["policy"] == "slo" and row["concurrency"] == level),
         key=lambda row: int(row["repeat"]),
     )
+    def completion_rate(row: dict[str, object]) -> float:
+        if "requests" not in row:
+            return 1.0
+        requests = int(row["requests"])
+        return float(row.get("successful", 0)) / requests if requests else 0.0
+
+    def totals(group: list[dict[str, object]]) -> dict[str, int]:
+        return {
+            key: sum(int(row.get(key, 0)) for row in group)
+            for key in ("requests", "successful", "rejections", "timeouts", "failures")
+        }
+
+    policy_totals = {"fifo": totals(fifo), "slo": totals(slo)}
     if any(row.get("p95_ttft_ms") is None for row in fifo + slo):
         (suite_dir / "comparison.json").write_text(
             json.dumps({
                 "keep": False,
                 "ttft_delta_ms": None,
                 "throughput_ratio": None,
+                "completion_ratio": None,
+                "policy_totals": policy_totals,
                 "reason": "one or more policy runs had no successful first token",
             }, indent=2) + "\n", encoding="utf-8",
         )
@@ -302,9 +335,16 @@ def compare_and_record_policies(
         [float(row["p95_ttft_ms"]) for row in slo],
         [float(row["requests_per_second"]) for row in fifo],
         [float(row["requests_per_second"]) for row in slo],
+        float(config.get("throughput_floor_ratio", 0.95)),
+        fifo_completion=[completion_rate(row) for row in fifo],
+        slo_completion=[completion_rate(row) for row in slo],
     )
     (suite_dir / "comparison.json").write_text(
-        json.dumps(comparison_as_dict(comparison), indent=2) + "\n", encoding="utf-8"
+        json.dumps({
+            **comparison_as_dict(comparison),
+            "policy_totals": policy_totals,
+        }, indent=2) + "\n",
+        encoding="utf-8",
     )
     decision = "keep" if comparison.keep else "revert"
     if evidence_kind != "gpu":
@@ -323,7 +363,10 @@ def compare_and_record_policies(
             "throughput ratio: "
             f"{comparison.throughput_ratio.estimate:.3f}, 95% CI "
             f"[{comparison.throughput_ratio.low:.3f}, "
-            f"{comparison.throughput_ratio.high:.3f}]"
+            f"{comparison.throughput_ratio.high:.3f}]; completion ratio: "
+            f"{comparison.completion_ratio.estimate:.3f}, 95% CI "
+            f"[{comparison.completion_ratio.low:.3f}, "
+            f"{comparison.completion_ratio.high:.3f}]"
         ),
     )
 

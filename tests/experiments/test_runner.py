@@ -27,6 +27,18 @@ def test_policy_improvement_requires_ttft_and_throughput() -> None:
     assert failed.keep is False
 
 
+def test_policy_cannot_win_by_rejecting_requests() -> None:
+    result = compare_policies(
+        [100, 105, 110], [60, 65, 70],
+        [10, 10, 10], [10, 10, 10],
+        fifo_completion=[1.0, 1.0, 1.0],
+        slo_completion=[0.8, 0.82, 0.79],
+    )
+    assert result.keep is False
+    assert result.completion_ratio.high < 0.95
+    assert "completion" in result.reason.lower()
+
+
 def test_state_ledger_records_hypothesis_and_decision(tmp_path: Path) -> None:
     path = tmp_path / "BENCH_STATE.md"
     append_state(
@@ -188,3 +200,32 @@ def test_all_rejected_policy_run_is_inconclusive_not_a_crash(tmp_path: Path, mon
     comparison = json.loads((tmp_path / "comparison.json").read_text())
     assert comparison["keep"] is False
     assert entries[0]["decision"] == "inconclusive"
+
+
+def test_policy_artifact_records_completion_and_rejection_evidence(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr("experiments.runner.append_state", lambda *args, **kwargs: None)
+    rows = []
+    for repeat in range(3):
+        rows.extend([
+            {
+                "policy": "fifo", "concurrency": 8, "repeat": repeat,
+                "p95_ttft_ms": 100, "requests_per_second": 10,
+                "requests": 100, "successful": 100, "rejections": 0, "timeouts": 0,
+            },
+            {
+                "policy": "slo", "concurrency": 8, "repeat": repeat,
+                "p95_ttft_ms": 70, "requests_per_second": 10,
+                "requests": 100, "successful": 80, "rejections": 20, "timeouts": 0,
+            },
+        ])
+    compare_and_record_policies(
+        {"name": "scheduler", "throughput_floor_ratio": 0.95},
+        rows, tmp_path, "gpu",
+    )
+    import json
+    comparison = json.loads((tmp_path / "comparison.json").read_text())
+    assert comparison["keep"] is False
+    assert comparison["completion_ratio"]["estimate"] == 0.8
+    assert comparison["policy_totals"]["slo"]["rejections"] == 60

@@ -20,6 +20,13 @@ from servebench.stats import bootstrap_ci  # noqa: E402
 
 def _normalize(row: dict[str, object]) -> dict[str, object]:
     normalized = dict(row)
+    requests = int(row.get("requests", 0))
+    if requests:
+        normalized["completion_rate"] = float(row.get("successful", 0)) / requests
+        normalized["rejection_rate"] = float(row.get("rejections", 0)) / requests
+    else:
+        normalized.setdefault("completion_rate", 1.0)
+        normalized.setdefault("rejection_rate", 0.0)
     queue = row.get("queue_time_ms")
     if "queue_p95_ms" not in normalized and isinstance(queue, dict):
         normalized["queue_p95_ms"] = queue.get("p95")
@@ -97,8 +104,8 @@ def generate_report(
     _plot(policies, "policy", ["p95_ttft_ms"], figures / "scheduler-comparison.png", "FIFO vs SLO")
     table_lines = [
         "| policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | "
-        "power (W) | $ / 1M output tokens |",
-        "|---|---:|---:|---:|---:|",
+        "completion % | rejection % | power (W) | $ / 1M output tokens |",
+        "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for policy_name, group in comparison_frame.groupby("policy"):
         ttft_values = group["p95_ttft_ms"].dropna().astype(float).tolist()
@@ -121,6 +128,8 @@ def generate_report(
             )
             + " | "
             f"{throughput.estimate:.2f} [{throughput.low:.2f}, {throughput.high:.2f}] | "
+            f"{group['completion_rate'].astype(float).mean() * 100:.2f} | "
+            f"{group['rejection_rate'].astype(float).mean() * 100:.2f} | "
             f"{power_text} | {cost_text} |"
         )
     table = "\n".join(table_lines)
@@ -171,6 +180,8 @@ def generate_report(
                     fifo_rows.p95_ttft_ms.tolist(), slo_rows.p95_ttft_ms.tolist(),
                     fifo_rows.requests_per_second.tolist(),
                     slo_rows.requests_per_second.tolist(),
+                    fifo_completion=fifo_rows.completion_rate.tolist(),
+                    slo_completion=slo_rows.completion_rate.tolist(),
                 )
                 verdict = f"Based on repeated measurements: {comparison.reason}."
     if stages_available:

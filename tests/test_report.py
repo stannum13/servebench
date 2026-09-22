@@ -36,6 +36,8 @@ def test_report_generates_three_graphs_and_evidence_tables(tmp_path: Path) -> No
     assert "repeated measurements" in text
     assert "95% CI" in text
     assert "TTFT improved within throughput constraint" in text
+    assert "completion %" in text
+    assert "rejection %" in text
 
 
 def test_report_refuses_optimization_claim_with_too_few_repeats(tmp_path: Path) -> None:

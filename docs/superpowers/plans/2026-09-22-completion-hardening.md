@@ -31,10 +31,10 @@
 - Consumes: per-repeat `p95_ttft_ms`, `requests_per_second`, `requests`, `successful`, `rejections`, `timeouts`, and `failures`.
 - Produces: `comparison.json` with paired confidence intervals plus offered, accepted, rejection, timeout, and completion-rate evidence; a positive decision requires the configured throughput floor and no degraded completion rate.
 
-- [ ] **Step 1: Write failing tests** demonstrating that a low-TTFT policy with a worse completion ratio cannot be kept and that the report renders acceptance/rejection evidence.
-- [ ] **Step 2: Run focused tests** with `.venv/bin/pytest -q tests/experiments/test_runner.py tests/test_report.py`; expect the new assertions to fail.
-- [ ] **Step 3: Implement the minimal comparison fields and gates** using paired bootstrap intervals and configured `throughput_floor_ratio`.
-- [ ] **Step 4: Re-run the focused tests** and require all to pass.
+- [x] **Step 1: Write failing tests** demonstrating that a low-TTFT policy with a worse completion ratio cannot be kept and that the report renders acceptance/rejection evidence.
+- [x] **Step 2: Run focused tests** with `.venv/bin/pytest -q tests/experiments/test_runner.py tests/test_report.py`; expect the new assertions to fail.
+- [x] **Step 3: Implement the minimal comparison fields and gates** using paired bootstrap intervals and configured `throughput_floor_ratio`.
+- [x] **Step 4: Re-run the focused tests** and require all to pass.
 
 ### Task 2: Explicit ITL and TPOT semantics
 
