@@ -9,3 +9,5 @@ concurrency:
 objective: p95_ttft_ms
 throughput_floor_ratio: 0.95
 max_policy_iterations: 3
+cache_isolation: paired-alternating-shared-engine
+cache_state_initial: warm-or-unknown

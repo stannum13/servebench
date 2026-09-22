@@ -9,6 +9,7 @@ from experiments.runner import (
     compare_and_record_policies,
     compare_policies,
     detect_saturation,
+    execute_suite,
     loadgen_command,
     validate_repeats,
 )
@@ -82,6 +83,51 @@ def test_scheduler_specs_cross_policies_but_not_engine_settings() -> None:
     })
     assert len(specs) == 6
     assert {spec.policy for spec in specs} == {"fifo", "slo"}
+    assert [(spec.repeat, spec.policy) for spec in specs] == [
+        (0, "fifo"), (0, "slo"),
+        (1, "slo"), (1, "fifo"),
+        (2, "fifo"), (2, "slo"),
+    ]
+    assert specs[0].seed == specs[1].seed
+    assert specs[2].seed == specs[3].seed
+
+
+def test_suite_rows_record_reproducibility_and_cache_provenance(
+    tmp_path: Path, monkeypatch
+) -> None:
+    import json
+
+    import yaml
+
+    config = {
+        "name": "scheduler", "model": "open/model", "workload": "mixed",
+        "seed": 7, "repeats": 3, "requests": 5,
+        "policies": ["fifo", "slo"], "concurrency": {"coarse": [2]},
+        "cache_isolation": "paired-alternating-shared-engine",
+        "cache_state_initial": "warm-or-unknown",
+    }
+    config_path = tmp_path / "suite.yaml"
+    config_path.write_text(yaml.safe_dump(config))
+
+    def fake_run(command, check):
+        assert check is True
+        output = Path(command[command.index("--output") + 1])
+        output.parent.mkdir(parents=True)
+        (output.parent / "summary.json").write_text(json.dumps({
+            "requests": 5, "successful": 5, "rejections": 0,
+            "failures": 0, "timeouts": 0,
+            "ttft_ms": {"p95": 100}, "requests_per_second": 10,
+        }))
+
+    monkeypatch.setattr("experiments.runner.subprocess.run", fake_run)
+    monkeypatch.setattr("experiments.runner.append_state", lambda *args, **kwargs: None)
+    rows = execute_suite(config_path, "http://router", tmp_path / "results", evidence_kind="mock")
+    assert all(row["model"] == "open/model" for row in rows)
+    assert all(row["workload"] == "mixed" for row in rows)
+    assert all(row["requested_requests"] == 5 for row in rows)
+    assert all(row["cache_isolation"] == "paired-alternating-shared-engine" for row in rows)
+    assert all(row["cache_state_initial"] == "warm-or-unknown" for row in rows)
+    assert [row["policy"] for row in rows] == ["fifo", "slo", "slo", "fifo", "fifo", "slo"]
 
 
 def test_saturation_detects_throughput_plateau_with_ttft_growth() -> None:

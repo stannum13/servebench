@@ -57,6 +57,17 @@ def engine_evidence_verified(
     )
 
 
+def _provenance(row: dict[str, object]) -> dict[str, object]:
+    return {
+        field: row.get(field)
+        for field in (
+            "model", "workload", "seed", "cache_isolation",
+            "cache_state_initial", "engine_variant", "changed_variable",
+            "engine_settings",
+        )
+    }
+
+
 def _slug(value: object) -> str:
     return str(value).lower().replace("_", "-")
 
@@ -180,6 +191,8 @@ def execute_engine_sweeps(
                 json.dumps({
                     "baseline_suite": f"engine-{baseline_name}",
                     "candidate_suite": f"engine-{variant.name}",
+                    "baseline_provenance": _provenance(baseline_rows[0]),
+                    "candidate_provenance": _provenance(variant_rows[0]),
                     "keep": bool(verified and comparison and comparison.keep),
                     "ttft_delta_ms": (
                         asdict(comparison.ttft_delta_ms) if comparison else None
@@ -240,6 +253,11 @@ def _execute_variant_suite(
         "requests": config.get("requests", 100),
         "policy": "fifo",
         "model": served_model,
+        "cache_isolation": "vllm-restart-before-suite",
+        "cache_state_initial": "cold",
+        "engine_variant": name,
+        "changed_variable": variable,
+        "engine_settings": settings,
         "concurrency": {"coarse": [saturation_concurrency]},
     }
     with tempfile.TemporaryDirectory(prefix="servebench-engine-") as directory:

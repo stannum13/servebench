@@ -7,6 +7,8 @@ policy: fifo
 concurrency:
   coarse: [1, 2, 4, 8, 16, 32, 64, 128]
   refine_transition: true
+cache_isolation: shared-engine-no-reset
+cache_state_initial: cold-after-deployment-then-warming
 engine_baseline:
   max_num_batched_tokens: 8192
   max_num_seqs: 256

@@ -6,4 +6,5 @@ requests: 12
 policy: fifo
 concurrency:
   coarse: [1, 2, 4]
-
+cache_isolation: shared-engine-no-reset
+cache_state_initial: cold-after-deployment-then-warming

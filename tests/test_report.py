@@ -14,6 +14,9 @@ def rows(repeats: int = 3) -> list[dict[str, object]]:
                 "kv_p95": 0.1 * concurrency, "power_watts": 250,
                 "gpu_memory_peak_mib": 20000, "evidence_kind": "gpu",
                 "vllm_queue_mean_ms": 20, "vllm_prefill_mean_ms": 80,
+                "model": "open/model",
+                "cache_isolation": "paired-alternating-shared-engine",
+                "cache_state_initial": "warm-or-unknown",
             })
         result.append({
             "policy": "slo", "repeat": repeat, "concurrency": 8,
@@ -21,6 +24,9 @@ def rows(repeats: int = 3) -> list[dict[str, object]]:
             "queue_p95_ms": 80, "gpu_p95": 77, "kv_p95": 0.7, "power_watts": 245,
             "gpu_memory_peak_mib": 20000, "evidence_kind": "gpu",
             "vllm_queue_mean_ms": 15, "vllm_prefill_mean_ms": 70,
+            "model": "open/model",
+            "cache_isolation": "paired-alternating-shared-engine",
+            "cache_state_initial": "warm-or-unknown",
         })
     return result
 
@@ -76,6 +82,15 @@ def test_report_never_claims_improvement_without_provenance(tmp_path: Path) -> N
     generate_report(unknown_rows, report, tmp_path / "figures")
     text = report.read_text().lower()
     assert "no optimization claim" in text
+
+
+def test_report_never_claims_without_cache_provenance(tmp_path: Path) -> None:
+    unknown_rows = [{key: value for key, value in row.items()
+                     if key not in {"cache_isolation", "cache_state_initial"}}
+                    for row in rows()]
+    report = tmp_path / "REPORT.md"
+    generate_report(unknown_rows, report, tmp_path / "figures")
+    assert "no optimization claim" in report.read_text().lower()
 
 
 def test_report_never_claims_without_vllm_queue_and_prefill_telemetry(tmp_path: Path) -> None:

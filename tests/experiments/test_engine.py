@@ -67,7 +67,7 @@ def test_engine_variant_suite_requests_actual_served_model(tmp_path: Path, monke
 
     def fake_execute_suite(path, *args):
         import yaml
-        captured.append(yaml.safe_load(path.read_text())["model"])
+        captured.append(yaml.safe_load(path.read_text()))
         return [{"p95_ttft_ms": 100, "requests_per_second": 10}]
 
     monkeypatch.setattr("experiments.runner.execute_suite", fake_execute_suite)
@@ -76,7 +76,10 @@ def test_engine_variant_suite_requests_actual_served_model(tmp_path: Path, monke
         {"seed": 1, "repeats": 3, "requests": 10}, 1,
         "http://router", "http://prometheus", tmp_path, "quantized/model",
     )
-    assert captured == ["quantized/model"]
+    assert captured[0]["model"] == "quantized/model"
+    assert captured[0]["cache_isolation"] == "vllm-restart-before-suite"
+    assert captured[0]["cache_state_initial"] == "cold"
+    assert captured[0]["engine_settings"]["precision"] == "awq"
 
 
 def test_engine_candidate_cannot_be_kept_with_missing_gpu_or_first_tokens() -> None:
@@ -111,6 +114,10 @@ def test_each_engine_candidate_gets_a_fresh_named_baseline(
             {
                 "repeat": repeat, "evidence_kind": "gpu", "p95_ttft_ms": 100,
                 "requests_per_second": 10,
+                "model": "base/model",
+                "cache_isolation": "vllm-restart-before-suite",
+                "cache_state_initial": "cold",
+                "engine_settings": baseline(),
             }
             for repeat in range(3)
         ]
@@ -141,3 +148,5 @@ def test_each_engine_candidate_gets_a_fresh_named_baseline(
         (tmp_path / "results/engine-max_num_seqs-128/decision.json").read_text()
     )
     assert decision["baseline_suite"] == "engine-baseline-for-max_num_seqs-128"
+    assert decision["baseline_provenance"]["cache_state_initial"] == "cold"
+    assert decision["candidate_provenance"]["cache_isolation"] == "vllm-restart-before-suite"

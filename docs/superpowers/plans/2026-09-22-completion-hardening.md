@@ -69,10 +69,10 @@
 - Consumes: suite config, model identity, engine settings, paired baseline/candidate names, seed, and process restart boundaries.
 - Produces: run manifests that record model/settings/cache-isolation mode and decision artifacts linking the exact baseline and candidate suite IDs.
 
-- [ ] **Step 1: Write failing tests** requiring provenance fields and explicit cold-start/cache-state metadata for baseline and engine candidates.
-- [ ] **Step 2: Run focused tests** and confirm missing fields fail.
-- [ ] **Step 3: Add provenance to every summary and decision artifact.** Treat vLLM restart as the cache reset boundary for engine variants; document that ordinary repeated scheduler runs intentionally preserve cache state and use paired seeds/order.
-- [ ] **Step 4: Re-run focused tests** and require all to pass.
+- [x] **Step 1: Write failing tests** requiring provenance fields and explicit cold-start/cache-state metadata for baseline and engine candidates.
+- [x] **Step 2: Run focused tests** and confirm missing fields fail.
+- [x] **Step 3: Add provenance to every summary and decision artifact.** Treat vLLM restart as the cache reset boundary for engine variants; document that ordinary repeated scheduler runs intentionally preserve cache state and use paired seeds/order.
+- [x] **Step 4: Re-run focused tests** and require all to pass.
 
 ### Task 4: End-to-end completion contract and documentation
 

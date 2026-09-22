@@ -104,20 +104,24 @@ def build_run_specs(config: dict[str, object]) -> list[RunSpec]:
     raw_policies = config.get("policies", [config.get("policy", "fifo")])
     if not isinstance(raw_policies, list) or not raw_policies:
         raise ValueError("policies must be a non-empty list")
-    return [
-        RunSpec(
-            suite=str(config["name"]),
-            workload=str(config.get("workload", "mixed")),
-            requests=int(config.get("requests", 100)),
-            concurrency=int(level),
-            repeat=repeat,
-            seed=int(config.get("seed", 0)) + repeat,
-            policy=str(policy),
-        )
-        for level in concurrency["coarse"]
-        for policy in raw_policies
-        for repeat in range(repeats)
-    ]
+    specs: list[RunSpec] = []
+    for level in concurrency["coarse"]:
+        for repeat in range(repeats):
+            # Rotate policy order between paired repeats so a warm prefix cache or
+            # other temporal drift does not always favor the same policy.
+            offset = repeat % len(raw_policies)
+            policies = raw_policies[offset:] + raw_policies[:offset]
+            for policy in policies:
+                specs.append(RunSpec(
+                    suite=str(config["name"]),
+                    workload=str(config.get("workload", "mixed")),
+                    requests=int(config.get("requests", 100)),
+                    concurrency=int(level),
+                    repeat=repeat,
+                    seed=int(config.get("seed", 0)) + repeat,
+                    policy=str(policy),
+                ))
+    return specs
 
 
 def build_refinement_specs(
@@ -208,7 +212,16 @@ def execute_suite(
     specs = build_run_specs(config)
     rows: list[dict[str, object]] = []
     telemetry = PrometheusTelemetry(prometheus_url) if prometheus_url else None
-    def run(spec: RunSpec) -> dict[str, object]:
+    raw_policies = config.get("policies", [config.get("policy", "fifo")])
+    policies = raw_policies if isinstance(raw_policies, list) else [raw_policies]
+    cache_isolation = str(config.get(
+        "cache_isolation",
+        "paired-alternating-shared-engine" if len(policies) > 1 else "shared-engine-no-reset",
+    ))
+    cache_state_initial = str(config.get("cache_state_initial", "warm-or-unknown"))
+    model = str(config.get("model", os.getenv("MODEL", "Qwen/Qwen2.5-7B-Instruct")))
+
+    def run(spec: RunSpec, execution_order: int) -> dict[str, object]:
         output_dir = results_root / spec.suite / spec.run_id
         output = output_dir / "requests.jsonl"
         command = loadgen_command(spec, config, url, output)
@@ -221,17 +234,26 @@ def execute_suite(
         summary.update({
             "run_id": spec.run_id, "policy": spec.policy, "repeat": spec.repeat,
             "seed": spec.seed, "concurrency": spec.concurrency,
+            "suite": spec.suite, "workload": spec.workload,
+            "requested_requests": spec.requests, "model": model,
+            "cache_isolation": cache_isolation,
+            "cache_state_initial": cache_state_initial,
+            "execution_order": execution_order,
             "p95_ttft_ms": summary["ttft_ms"]["p95"],
             "evidence_kind": classify_evidence(evidence_kind, summary),
             "evidence_requested": evidence_kind,
         })
+        for field in ("engine_variant", "changed_variable", "engine_settings"):
+            if field in config:
+                summary[field] = config[field]
         return summary
 
     try:
-        for spec in specs:
-            rows.append(run(spec))
-        for spec in build_refinement_specs(config, rows):
-            rows.append(run(spec))
+        for execution_order, spec in enumerate(specs):
+            rows.append(run(spec, execution_order))
+        refinement_specs = build_refinement_specs(config, rows)
+        for execution_order, spec in enumerate(refinement_specs, start=len(rows)):
+            rows.append(run(spec, execution_order))
     finally:
         if telemetry:
             telemetry.close()
@@ -310,6 +332,13 @@ def compare_and_record_policies(
         }
 
     policy_totals = {"fifo": totals(fifo), "slo": totals(slo)}
+    provenance_fields = (
+        "model", "workload", "cache_isolation", "cache_state_initial",
+    )
+    provenance = {
+        field: rows[0].get(field, config.get(field, "unknown"))
+        for field in provenance_fields
+    }
     if any(row.get("p95_ttft_ms") is None for row in fifo + slo):
         (suite_dir / "comparison.json").write_text(
             json.dumps({
@@ -318,6 +347,7 @@ def compare_and_record_policies(
                 "throughput_ratio": None,
                 "completion_ratio": None,
                 "policy_totals": policy_totals,
+                "provenance": provenance,
                 "reason": "one or more policy runs had no successful first token",
             }, indent=2) + "\n", encoding="utf-8",
         )
@@ -343,6 +373,7 @@ def compare_and_record_policies(
         json.dumps({
             **comparison_as_dict(comparison),
             "policy_totals": policy_totals,
+            "provenance": provenance,
         }, indent=2) + "\n",
         encoding="utf-8",
     )

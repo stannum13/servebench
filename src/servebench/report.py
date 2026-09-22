@@ -140,12 +140,21 @@ def generate_report(
         "gpu_utilization_peak", "gpu_memory_peak_mib", "kv_cache_peak",
         "vllm_queue_mean_ms", "vllm_prefill_mean_ms",
     )
+    required_provenance_fields = (
+        "model", "cache_isolation", "cache_state_initial",
+    )
     gpu_evidence = (
         "evidence_kind" in comparison_frame
         and set(comparison_frame["evidence_kind"]) == {"gpu"}
         and all(
             field in comparison_frame and comparison_frame[field].notna().all()
             for field in required_gpu_fields
+        )
+        and all(
+            field in comparison_frame
+            and comparison_frame[field].notna().all()
+            and not comparison_frame[field].astype(str).str.lower().eq("unknown").any()
+            for field in required_provenance_fields
         )
     )
     if repeats >= 3 and missing_first_tokens:
