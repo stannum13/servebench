@@ -5,57 +5,57 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.8039300409145653,
-    "requests_per_second": 14.926671960595705,
-    "input_tokens_per_second": 22927.368131475003,
-    "output_tokens_per_second": 1910.6140109562502,
+    "duration_seconds": 0.8011007499881089,
+    "requests_per_second": 14.979389296762138,
+    "input_tokens_per_second": 23008.341959826645,
+    "output_tokens_per_second": 1917.3618299855536,
     "ttft_ms": {
-      "p50": 12.590104,
-      "p95": 17.20771,
-      "p99": 17.647876
+      "p50": 10.483521,
+      "p95": 14.749412,
+      "p99": 15.995749
     },
     "inter_token_latency_ms": {
-      "p50": 2.004167,
-      "p95": 2.518066,
-      "p99": 3.324252
+      "p50": 1.989063,
+      "p95": 2.633297,
+      "p99": 3.220452
     },
     "tpot_ms": {
-      "p50": 2.010143,
-      "p95": 2.029551,
-      "p99": 2.034328
+      "p50": 2.01365,
+      "p95": 2.027179,
+      "p99": 2.02791
     },
     "e2e_latency_ms": {
-      "p50": 266.018792,
-      "p95": 271.34874,
-      "p99": 272.096281
+      "p50": 265.603958,
+      "p95": 271.263079,
+      "p99": 271.478716
     },
     "queue_time_ms": {
-      "p50": 271.63125,
-      "p95": 540.976823,
-      "p99": 541.956465
+      "p50": 270.728125,
+      "p95": 535.597335,
+      "p99": 536.117067
     },
     "client_queue_time_ms": {
-      "p50": 271.63125,
-      "p95": 540.976823,
-      "p99": 541.956465
+      "p50": 270.728125,
+      "p95": 535.597335,
+      "p99": 536.117067
     },
     "router_admission_ms": {
-      "p50": 0.152334,
-      "p95": 1.452852,
-      "p99": 2.047603
+      "p50": 0.577208,
+      "p95": 2.746669,
+      "p99": 3.722167
     },
     "post_header_ttft_ms": {
-      "p50": 4.196896,
-      "p95": 5.806984,
-      "p99": 6.218163
+      "p50": 4.162042,
+      "p95": 5.247056,
+      "p99": 5.360411
     },
-    "kv_cache_peak": null,
+    "kv_cache_peak": 0.0,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_peak": 0.0,
     "vllm_queue_mean_ms": null,
     "vllm_prefill_mean_ms": null,
     "vllm_ttft_mean_ms": null,
@@ -72,59 +72,59 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 0,
-    "p95_ttft_ms": 17.20771,
+    "p95_ttft_ms": 14.749412,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
   {
     "requests": 12,
-    "successful": 0,
-    "failures": 12,
+    "successful": 12,
+    "failures": 0,
     "timeouts": 0,
-    "rejections": 12,
-    "duration_seconds": 0.023747500032186508,
-    "requests_per_second": 0.0,
-    "input_tokens_per_second": 0.0,
-    "output_tokens_per_second": 0.0,
+    "rejections": 0,
+    "duration_seconds": 0.9756933329626918,
+    "requests_per_second": 12.298946394931297,
+    "input_tokens_per_second": 18891.181662614472,
+    "output_tokens_per_second": 1574.265138551206,
     "ttft_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 10.234834,
+      "p95": 14.300196,
+      "p99": 14.587039
     },
     "inter_token_latency_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 1.991334,
+      "p95": 2.946683,
+      "p99": 21.301609
     },
     "tpot_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 2.054473,
+      "p95": 3.330055,
+      "p99": 3.334901
     },
     "e2e_latency_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 269.087417,
+      "p95": 436.112143,
+      "p99": 436.723761
     },
     "queue_time_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 267.807792,
+      "p95": 539.092461,
+      "p99": 539.362126
     },
     "client_queue_time_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 267.807792,
+      "p95": 539.092461,
+      "p99": 539.362126
     },
     "router_admission_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 0.533084,
+      "p95": 1.477489,
+      "p99": 1.631398
     },
     "post_header_ttft_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 3.03623,
+      "p95": 5.892678,
+      "p99": 7.353569
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -132,7 +132,7 @@
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_peak": 0.0,
     "vllm_queue_mean_ms": null,
     "vllm_prefill_mean_ms": null,
     "vllm_ttft_mean_ms": null,
@@ -149,59 +149,59 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 1,
-    "p95_ttft_ms": null,
+    "p95_ttft_ms": 14.300196,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
   {
     "requests": 12,
-    "successful": 0,
-    "failures": 12,
+    "successful": 12,
+    "failures": 0,
     "timeouts": 0,
-    "rejections": 12,
-    "duration_seconds": 0.024831916205585003,
-    "requests_per_second": 0.0,
-    "input_tokens_per_second": 0.0,
-    "output_tokens_per_second": 0.0,
+    "rejections": 0,
+    "duration_seconds": 0.7999989171512425,
+    "requests_per_second": 15.000020303441685,
+    "input_tokens_per_second": 23040.031186086428,
+    "output_tokens_per_second": 1920.0025988405357,
     "ttft_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 8.271229,
+      "p95": 16.543877,
+      "p99": 16.931975
     },
     "inter_token_latency_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 1.998146,
+      "p95": 2.625046,
+      "p99": 3.058003
     },
     "tpot_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 1.999261,
+      "p95": 2.012403,
+      "p99": 2.014485
     },
     "e2e_latency_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 263.286354,
+      "p95": 272.179104,
+      "p99": 272.302854
     },
     "queue_time_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 271.688438,
+      "p95": 536.325527,
+      "p99": 537.155605
     },
     "client_queue_time_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 271.688438,
+      "p95": 536.325527,
+      "p99": 537.155605
     },
     "router_admission_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 0.294604,
+      "p95": 2.384644,
+      "p99": 2.859129
     },
     "post_header_ttft_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 3.743334,
+      "p95": 5.585802,
+      "p99": 5.683793
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -209,7 +209,7 @@
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_peak": 0.0,
     "vllm_queue_mean_ms": null,
     "vllm_prefill_mean_ms": null,
     "vllm_ttft_mean_ms": null,
@@ -226,7 +226,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 2,
-    "p95_ttft_ms": null,
+    "p95_ttft_ms": 16.543877,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -236,49 +236,49 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.7991807917132974,
-    "requests_per_second": 15.01537590045701,
-    "input_tokens_per_second": 23063.61738310197,
-    "output_tokens_per_second": 1921.9681152584974,
+    "duration_seconds": 0.7930068750865757,
+    "requests_per_second": 15.132277382450072,
+    "input_tokens_per_second": 23243.17805944331,
+    "output_tokens_per_second": 1936.9315049536092,
     "ttft_ms": {
-      "p50": 8.269896,
-      "p95": 20.768863,
-      "p99": 20.902806
+      "p50": 9.098229,
+      "p95": 13.584794,
+      "p99": 13.605125
     },
     "inter_token_latency_ms": {
-      "p50": 1.987958,
-      "p95": 2.638461,
-      "p99": 3.341656
+      "p50": 1.987396,
+      "p95": 2.602592,
+      "p99": 3.042948
     },
     "tpot_ms": {
-      "p50": 1.998731,
-      "p95": 2.011632,
-      "p99": 2.01359
+      "p50": 1.994957,
+      "p95": 2.015585,
+      "p99": 2.020157
     },
     "e2e_latency_ms": {
-      "p50": 262.230584,
-      "p95": 275.514911,
-      "p99": 275.763749
+      "p50": 263.799042,
+      "p95": 267.6082,
+      "p99": 267.857606
     },
     "queue_time_ms": {
-      "p50": 275.624063,
-      "p95": 539.847817,
-      "p99": 540.03753
+      "p50": 267.962771,
+      "p95": 533.902058,
+      "p99": 534.501045
     },
     "client_queue_time_ms": {
-      "p50": 275.624063,
-      "p95": 539.847817,
-      "p99": 540.03753
+      "p50": 267.962771,
+      "p95": 533.902058,
+      "p99": 534.501045
     },
     "router_admission_ms": {
-      "p50": 0.271271,
-      "p95": 1.623012,
-      "p99": 1.983703
+      "p50": 0.347042,
+      "p95": 1.079894,
+      "p99": 1.222179
     },
     "post_header_ttft_ms": {
-      "p50": 4.097729,
-      "p95": 6.018806,
-      "p99": 6.802061
+      "p50": 3.811521,
+      "p95": 5.971095,
+      "p99": 6.359286
     },
     "kv_cache_peak": 0.0,
     "preemptions": null,
@@ -286,7 +286,7 @@
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_peak": 0.0,
     "vllm_queue_mean_ms": null,
     "vllm_prefill_mean_ms": null,
     "vllm_ttft_mean_ms": null,
@@ -303,7 +303,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 3,
-    "p95_ttft_ms": 20.768863,
+    "p95_ttft_ms": 13.584794,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -313,49 +313,49 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.8071643752045929,
-    "requests_per_second": 14.866860293429507,
-    "input_tokens_per_second": 22835.497410707725,
-    "output_tokens_per_second": 1902.958117558977,
+    "duration_seconds": 0.7988020828925073,
+    "requests_per_second": 15.022494629141832,
+    "input_tokens_per_second": 23074.551750361854,
+    "output_tokens_per_second": 1922.8793125301545,
     "ttft_ms": {
-      "p50": 9.332916,
-      "p95": 15.052544,
-      "p99": 16.623509
+      "p50": 10.649625,
+      "p95": 13.707431,
+      "p99": 13.801719
     },
     "inter_token_latency_ms": {
-      "p50": 1.989313,
-      "p95": 2.799904,
-      "p99": 3.683029
+      "p50": 1.982229,
+      "p95": 2.550327,
+      "p99": 3.019392
     },
     "tpot_ms": {
-      "p50": 2.035864,
-      "p95": 2.054445,
-      "p99": 2.060322
+      "p50": 1.992685,
+      "p95": 2.032797,
+      "p99": 2.034711
     },
     "e2e_latency_ms": {
-      "p50": 268.000958,
-      "p95": 274.89135,
-      "p99": 274.988003
+      "p50": 263.722083,
+      "p95": 270.372306,
+      "p99": 271.738561
     },
     "queue_time_ms": {
-      "p50": 274.660959,
-      "p95": 539.015317,
-      "p99": 539.139031
+      "p50": 270.134021,
+      "p95": 536.061181,
+      "p99": 537.048303
     },
     "client_queue_time_ms": {
-      "p50": 274.660959,
-      "p95": 539.015317,
-      "p99": 539.139031
+      "p50": 270.134021,
+      "p95": 536.061181,
+      "p99": 537.048303
     },
     "router_admission_ms": {
-      "p50": 0.154334,
-      "p95": 3.129671,
-      "p99": 3.939968
+      "p50": 0.357291,
+      "p95": 1.792683,
+      "p99": 1.800603
     },
     "post_header_ttft_ms": {
-      "p50": 3.704146,
-      "p95": 5.126294,
-      "p99": 5.245626
+      "p50": 3.346458,
+      "p95": 5.174148,
+      "p99": 5.51953
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -363,7 +363,7 @@
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_peak": 0.0,
     "vllm_queue_mean_ms": null,
     "vllm_prefill_mean_ms": null,
     "vllm_ttft_mean_ms": null,
@@ -380,59 +380,59 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 4,
-    "p95_ttft_ms": 15.052544,
+    "p95_ttft_ms": 13.707431,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
   {
     "requests": 12,
-    "successful": 0,
-    "failures": 12,
+    "successful": 12,
+    "failures": 0,
     "timeouts": 0,
-    "rejections": 12,
-    "duration_seconds": 0.024385583121329546,
-    "requests_per_second": 0.0,
-    "input_tokens_per_second": 0.0,
-    "output_tokens_per_second": 0.0,
+    "rejections": 0,
+    "duration_seconds": 0.7982060839422047,
+    "requests_per_second": 15.033711520631403,
+    "input_tokens_per_second": 23091.780895689837,
+    "output_tokens_per_second": 1924.3150746408196,
     "ttft_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 10.092396,
+      "p95": 16.893456,
+      "p99": 18.572258
     },
     "inter_token_latency_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 1.987834,
+      "p95": 2.702946,
+      "p99": 3.755037
     },
     "tpot_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 1.988583,
+      "p95": 2.016536,
+      "p99": 2.018079
     },
     "e2e_latency_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 261.609521,
+      "p95": 272.714806,
+      "p99": 273.881594
     },
     "queue_time_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 272.825876,
+      "p95": 536.332592,
+      "p99": 536.566818
     },
     "client_queue_time_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 272.825876,
+      "p95": 536.332592,
+      "p99": 536.566818
     },
     "router_admission_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 0.177355,
+      "p95": 2.884394,
+      "p99": 3.086446
     },
     "post_header_ttft_ms": {
-      "p50": null,
-      "p95": null,
-      "p99": null
+      "p50": 3.670521,
+      "p95": 5.85191,
+      "p99": 6.178115
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -440,7 +440,7 @@
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_peak": 0.0,
     "vllm_queue_mean_ms": null,
     "vllm_prefill_mean_ms": null,
     "vllm_ttft_mean_ms": null,
@@ -457,7 +457,161 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 5,
-    "p95_ttft_ms": null,
+    "p95_ttft_ms": 16.893456,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.8112853327766061,
+    "requests_per_second": 14.791343458571186,
+    "input_tokens_per_second": 22719.503552365342,
+    "output_tokens_per_second": 1893.2919626971118,
+    "ttft_ms": {
+      "p50": 9.795687,
+      "p95": 18.607796,
+      "p99": 18.880926
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.997854,
+      "p95": 3.015783,
+      "p99": 3.904407
+    },
+    "tpot_ms": {
+      "p50": 2.017434,
+      "p95": 2.058846,
+      "p99": 2.06556
+    },
+    "e2e_latency_ms": {
+      "p50": 268.999834,
+      "p95": 273.795121,
+      "p99": 274.674424
+    },
+    "queue_time_ms": {
+      "p50": 273.35425,
+      "p95": 539.383392,
+      "p99": 540.029312
+    },
+    "client_queue_time_ms": {
+      "p50": 273.35425,
+      "p95": 539.383392,
+      "p99": 540.029312
+    },
+    "router_admission_ms": {
+      "p50": 0.560542,
+      "p95": 2.158685,
+      "p99": 2.358903
+    },
+    "post_header_ttft_ms": {
+      "p50": 4.836105,
+      "p95": 6.452975,
+      "p99": 6.591795
+    },
+    "kv_cache_peak": 0.0,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": 0.0,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
+    "run_id": "slo-c0004-r03",
+    "policy": "slo",
+    "repeat": 3,
+    "seed": 20260917,
+    "concurrency": 4,
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 6,
+    "p95_ttft_ms": 18.607796,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.9216659590601921,
+    "requests_per_second": 13.019901496889617,
+    "input_tokens_per_second": 19998.56869922245,
+    "output_tokens_per_second": 1666.547391601871,
+    "ttft_ms": {
+      "p50": 14.788771,
+      "p95": 58.310352,
+      "p99": 69.56117
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.983708,
+      "p95": 2.784498,
+      "p99": 12.038956
+    },
+    "tpot_ms": {
+      "p50": 2.032019,
+      "p95": 2.718327,
+      "p99": 2.776313
+    },
+    "e2e_latency_ms": {
+      "p50": 270.504354,
+      "p95": 377.79439,
+      "p99": 379.660045
+    },
+    "queue_time_ms": {
+      "p50": 271.875458,
+      "p95": 540.766659,
+      "p99": 541.384932
+    },
+    "client_queue_time_ms": {
+      "p50": 271.875458,
+      "p95": 540.766659,
+      "p99": 541.384932
+    },
+    "router_admission_ms": {
+      "p50": 0.264605,
+      "p95": 2.210566,
+      "p99": 2.40688
+    },
+    "post_header_ttft_ms": {
+      "p50": 4.496292,
+      "p95": 35.423298,
+      "p99": 35.745726
+    },
+    "kv_cache_peak": null,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": 0.0,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
+    "run_id": "fifo-c0004-r03",
+    "policy": "fifo",
+    "repeat": 3,
+    "seed": 20260917,
+    "concurrency": 4,
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 7,
+    "p95_ttft_ms": 58.310352,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },

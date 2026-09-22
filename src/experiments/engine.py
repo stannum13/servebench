@@ -13,6 +13,8 @@ from pathlib import Path
 import httpx
 import yaml
 
+from servebench.stats import bootstrap_ci
+
 from .runner import PolicyComparison, compare_policies
 from .state import append_state
 
@@ -38,6 +40,9 @@ def compare_engine_variant(
     baseline_throughput: list[float],
     variant_throughput: list[float],
     throughput_floor: float = 0.95,
+    *,
+    baseline_completion: list[float] | None = None,
+    variant_completion: list[float] | None = None,
 ) -> PolicyComparison:
     return compare_policies(
         baseline_ttft,
@@ -45,6 +50,8 @@ def compare_engine_variant(
         baseline_throughput,
         variant_throughput,
         throughput_floor,
+        fifo_completion=baseline_completion,
+        slo_completion=variant_completion,
     )
 
 
@@ -179,7 +186,19 @@ def execute_engine_sweeps(
                     [float(row["p95_ttft_ms"]) for row in variant_rows],
                     [float(row["requests_per_second"]) for row in baseline_rows],
                     [float(row["requests_per_second"]) for row in variant_rows],
+                    baseline_completion=[_completion_rate(row) for row in baseline_rows],
+                    variant_completion=[_completion_rate(row) for row in variant_rows],
                 ) if first_tokens_present else None
+            )
+            baseline_completion = [_completion_rate(row) for row in baseline_rows]
+            variant_completion = [_completion_rate(row) for row in variant_rows]
+            completion_ratio = (
+                comparison.completion_ratio if comparison else bootstrap_ci([
+                    candidate / baseline if baseline else 1.0
+                    for baseline, candidate in zip(
+                        baseline_completion, variant_completion, strict=True
+                    )
+                ], seed=2)
             )
             verified = engine_evidence_verified(baseline_rows, variant_rows)
             reason = (
@@ -199,6 +218,9 @@ def execute_engine_sweeps(
                     ),
                     "throughput_ratio": (
                         asdict(comparison.throughput_ratio) if comparison else None
+                    ),
+                    "completion_ratio": (
+                        asdict(completion_ratio)
                     ),
                     "reason": reason,
                 }, indent=2) + "\n",
@@ -221,14 +243,28 @@ def execute_engine_sweeps(
                     f"{comparison.ttft_delta_ms.high:.2f}] ms; throughput ratio: "
                     f"{comparison.throughput_ratio.estimate:.3f}, 95% CI "
                     f"[{comparison.throughput_ratio.low:.3f}, "
-                    f"{comparison.throughput_ratio.high:.3f}]"
-                ) if comparison else "No successful first token in one or more repeats",
+                    f"{comparison.throughput_ratio.high:.3f}]; completion ratio: "
+                    f"{comparison.completion_ratio.estimate:.3f}, 95% CI "
+                    f"[{comparison.completion_ratio.low:.3f}, "
+                    f"{comparison.completion_ratio.high:.3f}]"
+                ) if comparison else (
+                    "No successful first token in one or more repeats; completion ratio: "
+                    f"{completion_ratio.estimate:.3f}, 95% CI "
+                    f"[{completion_ratio.low:.3f}, {completion_ratio.high:.3f}]"
+                ),
             )
             rows.extend(variant_rows)
         refresh_report_input(results_root)
     finally:
         restart_vllm(baseline_environment, health_url)
     return rows
+
+
+def _completion_rate(row: dict[str, object]) -> float:
+    if "requests" not in row:
+        return 1.0
+    requests = int(row["requests"])
+    return float(row.get("successful", 0)) / requests if requests else 0.0
 
 
 def _execute_variant_suite(

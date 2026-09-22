@@ -9,3 +9,4 @@ def test_mock_exposes_vllm_health_and_metrics_contract() -> None:
     metrics = client.get("/metrics")
     assert metrics.status_code == 200
     assert "vllm:gpu_cache_usage_perc" in metrics.text
+    assert "vllm:num_requests_waiting" in metrics.text

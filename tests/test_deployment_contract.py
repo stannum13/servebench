@@ -61,6 +61,6 @@ def test_committed_results_cover_decision_and_timing_contract() -> None:
 
 
 def test_three_required_graph_artifacts_exist() -> None:
-    assert all(Path("figures", name).is_file() for name in (
+    assert all(Path("figures", name).stat().st_size > 1000 for name in (
         "saturation.png", "latency-decomposition.png", "scheduler-comparison.png",
     ))

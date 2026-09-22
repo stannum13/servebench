@@ -60,6 +60,7 @@ def compare_policies(
     fifo_throughput: list[float],
     slo_throughput: list[float],
     throughput_floor: float = 0.95,
+    completion_floor: float = 1.0,
     *,
     fifo_completion: list[float] | None = None,
     slo_completion: list[float] | None = None,
@@ -78,17 +79,18 @@ def compare_policies(
     ratios = [new / old for old, new in zip(fifo_throughput, slo_throughput, strict=True)]
     throughput_ratio = bootstrap_ci(ratios, seed=1)
     completion_ratios = [
-        new / old for old, new in zip(fifo_completion, slo_completion, strict=True)
+        new / old if old else 1.0
+        for old, new in zip(fifo_completion, slo_completion, strict=True)
     ]
     completion_ratio = bootstrap_ci(completion_ratios, seed=2)
     keep = (
         ttft_delta.high < 0
         and throughput_ratio.low >= throughput_floor
-        and completion_ratio.low >= throughput_floor
+        and completion_ratio.low >= completion_floor
     )
     if keep:
         reason = "TTFT improved within throughput constraint and completion constraint"
-    elif completion_ratio.low < throughput_floor:
+    elif completion_ratio.low < completion_floor:
         reason = "completion-rate constraint failed"
     else:
         reason = "confidence or throughput constraint failed"
@@ -104,6 +106,8 @@ def build_run_specs(config: dict[str, object]) -> list[RunSpec]:
     raw_policies = config.get("policies", [config.get("policy", "fifo")])
     if not isinstance(raw_policies, list) or not raw_policies:
         raise ValueError("policies must be a non-empty list")
+    if len(raw_policies) > 1 and repeats % len(raw_policies):
+        raise ValueError("repeats must permit balanced policy order")
     specs: list[RunSpec] = []
     for level in concurrency["coarse"]:
         for repeat in range(repeats):
@@ -339,13 +343,20 @@ def compare_and_record_policies(
         field: rows[0].get(field, config.get(field, "unknown"))
         for field in provenance_fields
     }
+    fifo_completion = [completion_rate(row) for row in fifo]
+    slo_completion = [completion_rate(row) for row in slo]
+    completion_ratio = bootstrap_ci([
+        candidate / baseline if baseline else 1.0
+        for baseline, candidate in zip(fifo_completion, slo_completion, strict=True)
+    ], seed=2)
     if any(row.get("p95_ttft_ms") is None for row in fifo + slo):
         (suite_dir / "comparison.json").write_text(
             json.dumps({
                 "keep": False,
                 "ttft_delta_ms": None,
                 "throughput_ratio": None,
-                "completion_ratio": None,
+                "completion_ratio": asdict(completion_ratio),
+                "statistical_keep": False,
                 "policy_totals": policy_totals,
                 "provenance": provenance,
                 "reason": "one or more policy runs had no successful first token",
@@ -355,7 +366,10 @@ def compare_and_record_policies(
             Path("BENCH_STATE.md"),
             run_id=str(config["name"]),
             bottleneck="one or more policies produced no successful first token",
-            hypothesis="SLO admission reduces p95 TTFT with at least 95% FIFO throughput",
+            hypothesis=(
+                "SLO admission reduces p95 TTFT with at least 95% FIFO throughput "
+                "and no completion-rate regression"
+            ),
             variable="scheduling policy",
             decision="inconclusive",
         )
@@ -366,12 +380,16 @@ def compare_and_record_policies(
         [float(row["requests_per_second"]) for row in fifo],
         [float(row["requests_per_second"]) for row in slo],
         float(config.get("throughput_floor_ratio", 0.95)),
-        fifo_completion=[completion_rate(row) for row in fifo],
-        slo_completion=[completion_rate(row) for row in slo],
+        float(config.get("completion_floor_ratio", 1.0)),
+        fifo_completion=fifo_completion,
+        slo_completion=slo_completion,
     )
+    comparison_payload = comparison_as_dict(comparison)
+    comparison_payload["statistical_keep"] = comparison.keep
+    comparison_payload["keep"] = comparison.keep and evidence_kind == "gpu"
     (suite_dir / "comparison.json").write_text(
         json.dumps({
-            **comparison_as_dict(comparison),
+            **comparison_payload,
             "policy_totals": policy_totals,
             "provenance": provenance,
         }, indent=2) + "\n",
@@ -384,7 +402,10 @@ def compare_and_record_policies(
         Path("BENCH_STATE.md"),
         run_id=str(config["name"]),
         bottleneck="mixed-workload p95 TTFT at saturation",
-        hypothesis="SLO admission reduces p95 TTFT while preserving 95% of FIFO throughput",
+        hypothesis=(
+            "SLO admission reduces p95 TTFT while preserving 95% of FIFO throughput "
+            "and not reducing completion rate"
+        ),
         variable="scheduling policy",
         decision=decision,
         measurement=(

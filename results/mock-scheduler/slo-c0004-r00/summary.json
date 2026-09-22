@@ -1,51 +1,51 @@
 {
   "requests": 12,
-  "successful": 0,
-  "failures": 12,
+  "successful": 12,
+  "failures": 0,
   "timeouts": 0,
-  "rejections": 12,
-  "duration_seconds": 0.023747500032186508,
-  "requests_per_second": 0.0,
-  "input_tokens_per_second": 0.0,
-  "output_tokens_per_second": 0.0,
+  "rejections": 0,
+  "duration_seconds": 0.9756933329626918,
+  "requests_per_second": 12.298946394931297,
+  "input_tokens_per_second": 18891.181662614472,
+  "output_tokens_per_second": 1574.265138551206,
   "ttft_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 10.234834,
+    "p95": 14.300196,
+    "p99": 14.587039
   },
   "inter_token_latency_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 1.991334,
+    "p95": 2.946683,
+    "p99": 21.301609
   },
   "tpot_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 2.054473,
+    "p95": 3.330055,
+    "p99": 3.334901
   },
   "e2e_latency_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 269.087417,
+    "p95": 436.112143,
+    "p99": 436.723761
   },
   "queue_time_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 267.807792,
+    "p95": 539.092461,
+    "p99": 539.362126
   },
   "client_queue_time_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 267.807792,
+    "p95": 539.092461,
+    "p99": 539.362126
   },
   "router_admission_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 0.533084,
+    "p95": 1.477489,
+    "p99": 1.631398
   },
   "post_header_ttft_ms": {
-    "p50": null,
-    "p95": null,
-    "p99": null
+    "p50": 3.03623,
+    "p95": 5.892678,
+    "p99": 7.353569
   }
 }

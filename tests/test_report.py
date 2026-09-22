@@ -8,6 +8,9 @@ def rows(repeats: int = 3) -> list[dict[str, object]]:
     for repeat in range(repeats):
         for concurrency in (1, 4, 8):
             result.append({
+                "suite": "fifo-vs-slo",
+                "seed": repeat,
+                "workload": "mixed",
                 "policy": "fifo", "repeat": repeat, "concurrency": concurrency,
                 "p95_ttft_ms": concurrency * 100, "requests_per_second": concurrency * 2,
                 "queue_p95_ms": concurrency * 20, "gpu_p95": 70 + concurrency,
@@ -19,6 +22,9 @@ def rows(repeats: int = 3) -> list[dict[str, object]]:
                 "cache_state_initial": "warm-or-unknown",
             })
         result.append({
+            "suite": "fifo-vs-slo",
+            "seed": repeat,
+            "workload": "mixed",
             "policy": "slo", "repeat": repeat, "concurrency": 8,
             "p95_ttft_ms": 600, "requests_per_second": 15.5,
             "queue_p95_ms": 80, "gpu_p95": 77, "kv_p95": 0.7, "power_watts": 245,
@@ -139,3 +145,35 @@ def test_report_handles_policy_with_only_rejections(tmp_path: Path) -> None:
     text = report.read_text().lower()
     assert "unavailable" in text
     assert "no optimization claim" in text
+
+
+def test_report_does_not_mix_baseline_or_engine_rows_into_scheduler_comparison(
+    tmp_path: Path,
+) -> None:
+    mixed = rows() + [
+        {
+            **rows()[0], "suite": "baseline-saturation", "policy": "fifo",
+            "concurrency": concurrency, "p95_ttft_ms": 9000,
+        }
+        for concurrency in (1, 4, 8)
+    ] + [
+        {
+            **rows()[0], "suite": "engine-max-num-seqs-128", "policy": "fifo",
+            "concurrency": 8, "p95_ttft_ms": 12000,
+        }
+    ]
+    report = tmp_path / "REPORT.md"
+    generate_report(mixed, report, tmp_path / "figures")
+    text = report.read_text()
+    assert "| fifo | 800.00" in text
+    assert "TTFT improved within throughput constraint" in text
+
+
+def test_report_refuses_mismatched_scheduler_pair_provenance(tmp_path: Path) -> None:
+    mismatched = [
+        {**row, "seed": row["repeat"] + (100 if row["policy"] == "slo" else 0)}
+        for row in rows()
+    ]
+    report = tmp_path / "REPORT.md"
+    generate_report(mismatched, report, tmp_path / "figures")
+    assert "mismatched paired provenance" in report.read_text().lower()

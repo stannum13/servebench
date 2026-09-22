@@ -96,7 +96,8 @@ zero-duration gaps. TPOT is `(completion time - first-token time) / (output toke
 First sweep concurrency geometrically until throughput flattens and p95 TTFT turns sharply, then
 refine around that transition. If no transition is measured, the report says so. Independently vary
 max batched tokens, max sequences, prefix caching, chunked prefill, and BF16 versus AWQ. Run each
-candidate at least three times, bootstrap paired confidence intervals, and keep a scheduler change
+engine candidate at least three times and each scheduler policy four times, bootstrap paired
+confidence intervals, and keep a scheduler change
 only when p95 TTFT improves while throughput and completion rate stay at or above 95% of FIFO.
 FIFO and SLO repeats use the same seeds and alternate execution order to reduce warm-cache/order
 bias. Engine candidates restart vLLM before both the fresh baseline and candidate suite; manifests

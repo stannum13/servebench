@@ -20,6 +20,7 @@ from servebench.stats import bootstrap_ci  # noqa: E402
 
 def _normalize(row: dict[str, object]) -> dict[str, object]:
     normalized = dict(row)
+    normalized.setdefault("suite", "legacy")
     requests = int(row.get("requests", 0))
     if requests:
         normalized["completion_rate"] = float(row.get("successful", 0)) / requests
@@ -70,8 +71,23 @@ def generate_report(
         raise ValueError("report requires measurements")
     figures.mkdir(parents=True, exist_ok=True)
     frame = pd.DataFrame(_normalize(row) for row in rows)
+    suites = set(frame["suite"].astype(str))
+    baseline_suite = next(
+        (name for name in ("baseline-saturation", "mock-saturation") if name in suites),
+        None,
+    )
+    if baseline_suite is None:
+        eligible = frame[
+            (~frame["suite"].astype(str).str.startswith("engine-"))
+            & (frame["policy"] == "fifo")
+        ]
+        if eligible.empty:
+            raise ValueError("report requires a FIFO baseline suite")
+        baseline_suite = str(
+            eligible.groupby("suite")["concurrency"].nunique().sort_values().index[-1]
+        )
     fifo = (
-        frame[frame.policy == "fifo"]
+        frame[(frame.suite == baseline_suite) & (frame.policy == "fifo")]
         .groupby("concurrency", as_index=False)
         .mean(numeric_only=True)
     )
@@ -92,14 +108,35 @@ def generate_report(
         figures / "latency-decomposition.png",
         "Observed TTFT stages" if stages_available else "Client queue and TTFT (legacy)",
     )
-    comparison_frame = frame
-    policy_names = set(frame["policy"])
+    policy_sets = {
+        str(suite): set(group["policy"].astype(str))
+        for suite, group in frame.groupby("suite")
+    }
+    scheduler_candidates = [
+        suite for suite, policies_in_suite in policy_sets.items()
+        if {"fifo", "slo"} <= policies_in_suite
+    ]
+    scheduler_suite = next(
+        (name for name in ("fifo-vs-slo", "mock-scheduler") if name in scheduler_candidates),
+        scheduler_candidates[0] if len(scheduler_candidates) == 1 else None,
+    )
+    comparison_source = (
+        frame[frame.suite == scheduler_suite] if scheduler_suite is not None else frame
+    )
+    comparison_frame = comparison_source
+    policy_names = set(comparison_source["policy"])
     if {"fifo", "slo"} <= policy_names:
-        common_levels = set(frame[frame.policy == "fifo"].concurrency) & set(
-            frame[frame.policy == "slo"].concurrency
+        fifo_levels = set(
+            comparison_source[comparison_source.policy == "fifo"].concurrency
         )
+        slo_levels = set(
+            comparison_source[comparison_source.policy == "slo"].concurrency
+        )
+        common_levels = fifo_levels & slo_levels
         if common_levels:
-            comparison_frame = frame[frame.concurrency == max(common_levels)]
+            comparison_frame = comparison_source[
+                comparison_source.concurrency == max(common_levels)
+            ]
     policies = comparison_frame.groupby("policy", as_index=False).mean(numeric_only=True)
     _plot(policies, "policy", ["p95_ttft_ms"], figures / "scheduler-comparison.png", "FIFO vs SLO")
     table_lines = [
@@ -157,7 +194,22 @@ def generate_report(
             for field in required_provenance_fields
         )
     )
-    if repeats >= 3 and missing_first_tokens:
+    paired_provenance = True
+    if {"fifo", "slo"} <= policy_names:
+        pairing_fields = (
+            "repeat", "seed", "model", "workload", "cache_isolation",
+            "cache_state_initial",
+        )
+        fifo_pairs = comparison_frame[comparison_frame.policy == "fifo"].sort_values("repeat")
+        slo_pairs = comparison_frame[comparison_frame.policy == "slo"].sort_values("repeat")
+        paired_provenance = len(fifo_pairs) == len(slo_pairs) and all(
+            field in comparison_frame
+            and fifo_pairs[field].astype(str).tolist() == slo_pairs[field].astype(str).tolist()
+            for field in pairing_fields
+        )
+    if repeats >= 3 and not paired_provenance:
+        verdict = "Mismatched paired provenance: no optimization claim is made."
+    elif repeats >= 3 and missing_first_tokens:
         verdict = "One or more policy runs had no first token: no optimization claim is made."
     elif repeats >= 3 and not gpu_evidence:
         is_mock = (
@@ -172,7 +224,7 @@ def generate_report(
         else:
             verdict = "GPU provenance or telemetry unverified: no optimization claim is made."
     if (
-        repeats >= 3 and not missing_first_tokens and gpu_evidence
+        repeats >= 3 and paired_provenance and not missing_first_tokens and gpu_evidence
         and {"fifo", "slo"} <= policy_names
     ):
         common = set(comparison_frame[comparison_frame.policy == "fifo"].concurrency) & set(
@@ -180,8 +232,14 @@ def generate_report(
         )
         if common:
             concurrency = max(common)
-            fifo_rows = frame[(frame.policy == "fifo") & (frame.concurrency == concurrency)]
-            slo_rows = frame[(frame.policy == "slo") & (frame.concurrency == concurrency)]
+            fifo_rows = comparison_source[
+                (comparison_source.policy == "fifo")
+                & (comparison_source.concurrency == concurrency)
+            ]
+            slo_rows = comparison_source[
+                (comparison_source.policy == "slo")
+                & (comparison_source.concurrency == concurrency)
+            ]
             fifo_rows = fifo_rows.sort_values("repeat")
             slo_rows = slo_rows.sort_values("repeat")
             if len(fifo_rows) == len(slo_rows) and len(fifo_rows) >= 3:

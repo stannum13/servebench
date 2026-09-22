@@ -28,6 +28,8 @@ def create_app(token_delay: float = 0.001) -> FastAPI:
             "vllm:gpu_cache_usage_perc 0\n"
             "# TYPE vllm:num_preemptions_total counter\n"
             "vllm:num_preemptions_total 0\n"
+            "# TYPE vllm:num_requests_waiting gauge\n"
+            "vllm:num_requests_waiting 0\n"
         )
 
     @app.post("/tokenize")

@@ -1,22 +1,39 @@
 {
   "keep": false,
-  "ttft_delta_ms": null,
-  "throughput_ratio": null,
-  "completion_ratio": null,
+  "ttft_delta_ms": {
+    "estimate": -8.501666,
+    "low": -29.037146,
+    "high": 3.072554,
+    "confidence": 0.95
+  },
+  "throughput_ratio": {
+    "estimate": 0.9872802549776802,
+    "low": 0.865921,
+    "high": 1.099857,
+    "confidence": 0.95
+  },
+  "completion_ratio": {
+    "estimate": 1.0,
+    "low": 1.0,
+    "high": 1.0,
+    "confidence": 0.95
+  },
+  "reason": "confidence or throughput constraint failed",
+  "statistical_keep": false,
   "policy_totals": {
     "fifo": {
-      "requests": 36,
-      "successful": 36,
+      "requests": 48,
+      "successful": 48,
       "rejections": 0,
       "timeouts": 0,
       "failures": 0
     },
     "slo": {
-      "requests": 36,
-      "successful": 0,
-      "rejections": 36,
+      "requests": 48,
+      "successful": 48,
+      "rejections": 0,
       "timeouts": 0,
-      "failures": 36
+      "failures": 0
     }
   },
   "provenance": {
@@ -24,6 +41,5 @@
     "workload": "mixed",
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown"
-  },
-  "reason": "one or more policy runs had no successful first token"
+  }
 }

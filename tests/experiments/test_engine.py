@@ -62,6 +62,15 @@ def test_engine_variant_reverts_when_throughput_floor_fails() -> None:
     assert comparison.keep is False
 
 
+def test_engine_variant_reverts_when_completion_regresses() -> None:
+    comparison = compare_engine_variant(
+        [100, 105, 110], [75, 80, 85], [10, 10, 10], [10, 10, 10],
+        baseline_completion=[1.0, 1.0, 1.0],
+        variant_completion=[0.9, 0.9, 0.9],
+    )
+    assert comparison.keep is False
+
+
 def test_engine_variant_suite_requests_actual_served_model(tmp_path: Path, monkeypatch) -> None:
     captured = []
 
@@ -148,5 +157,6 @@ def test_each_engine_candidate_gets_a_fresh_named_baseline(
         (tmp_path / "results/engine-max_num_seqs-128/decision.json").read_text()
     )
     assert decision["baseline_suite"] == "engine-baseline-for-max_num_seqs-128"
+    assert decision["completion_ratio"]["estimate"] == 1.0
     assert decision["baseline_provenance"]["cache_state_initial"] == "cold"
     assert decision["candidate_provenance"]["cache_isolation"] == "vllm-restart-before-suite"

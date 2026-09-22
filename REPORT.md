@@ -6,10 +6,10 @@
 
 | policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | completion % | rejection % | power (W) | $ / 1M output tokens |
 |---|---:|---:|---:|---:|---:|---:|
-| fifo | 16.35 [14.91, 18.17] | 14.98 [14.91, 15.06] | 100.00 | 0.00 | unavailable | not configured |
-| slo | unavailable | 0.00 [0.00, 0.00] | 0.00 | 100.00 | unavailable | not configured |
+| fifo | 25.09 [13.65, 47.16] | 14.54 [13.52, 15.09] | 100.00 | 0.00 | unavailable | not configured |
+| slo | 16.59 [14.95, 18.09] | 14.28 [12.97, 15.02] | 100.00 | 0.00 | unavailable | not configured |
 
-One or more policy runs had no first token: no optimization claim is made.
+Mock evidence only: repeated measurements exist, but no optimization claim is made.
 
 ITL is measured between non-empty streamed output events; it is stream-event ITL,
 not a fabricated per-token gap when one event contains multiple token IDs. TPOT is

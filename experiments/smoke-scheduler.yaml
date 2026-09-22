@@ -1,11 +1,12 @@
 name: mock-scheduler
 workload: mixed
 seed: 20260914
-repeats: 3
+repeats: 4
 requests: 12
 policies: [fifo, slo]
 concurrency:
   coarse: [4]
 throughput_floor_ratio: 0.95
+completion_floor_ratio: 1.0
 cache_isolation: paired-alternating-shared-engine
 cache_state_initial: warm-or-unknown

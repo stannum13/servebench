@@ -4,8 +4,8 @@
 
 - Phase: backend smoke verified; GPU baseline pending
 - Latest run: `results/smoke/requests.jsonl` (mock backend, 8/8 successful)
-- Smoke observation (2026-09-22): p95 TTFT 21.92 ms, p95 stream-event ITL 2.67 ms,
-  p95 TPOT 2.03 ms, p95 router admission 0.45 ms, and p95 post-header TTFT 15.79 ms.
+- Smoke observation (2026-09-22): p95 TTFT 28.95 ms, p95 stream-event ITL 2.81 ms,
+  p95 TPOT 2.06 ms, p95 router admission 0.60 ms, and p95 post-header TTFT 21.05 ms.
   Eight 256-token prompts produced 128 token IDs each; not GPU evidence.
 - Baseline saturation run: pending NVIDIA GPU environment
 - Current bottleneck: pending measurement
@@ -46,4 +46,11 @@ variable, repeated confidence intervals, and a keep/revert/inconclusive decision
 - Bottleneck: one or more policies produced no successful first token
 - Hypothesis: SLO admission reduces p95 TTFT with at least 95% FIFO throughput
 - Variable changed: scheduling policy
+- Decision: inconclusive
+## mock-scheduler — 2026-09-22T16:32:45+00:00
+
+- Bottleneck: mixed-workload p95 TTFT at saturation
+- Hypothesis: SLO admission reduces p95 TTFT while preserving 95% of FIFO throughput
+- Variable changed: scheduling policy
+- Measurement: p95 TTFT delta: -8.50 ms, 95% CI [-29.04, 3.07] ms; throughput ratio: 0.987, 95% CI [0.866, 1.100]; completion ratio: 1.000, 95% CI [1.000, 1.000]
 - Decision: inconclusive

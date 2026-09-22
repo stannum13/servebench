@@ -40,6 +40,17 @@ def test_policy_cannot_win_by_rejecting_requests() -> None:
     assert "completion" in result.reason.lower()
 
 
+def test_policy_cannot_win_with_any_completion_rate_regression() -> None:
+    result = compare_policies(
+        [100, 105, 110], [60, 65, 70],
+        [10, 10, 10], [10, 10, 10],
+        fifo_completion=[1.0, 1.0, 1.0],
+        slo_completion=[0.96, 0.96, 0.96],
+    )
+    assert result.keep is False
+    assert result.completion_ratio.estimate == 0.96
+
+
 def test_state_ledger_records_hypothesis_and_decision(tmp_path: Path) -> None:
     path = tmp_path / "BENCH_STATE.md"
     append_state(
@@ -78,18 +89,27 @@ def test_baseline_specs_repeat_every_concurrency_with_distinct_seeds() -> None:
 
 def test_scheduler_specs_cross_policies_but_not_engine_settings() -> None:
     specs = build_run_specs({
-        "name": "scheduler", "workload": "mixed", "seed": 1, "repeats": 3,
+        "name": "scheduler", "workload": "mixed", "seed": 1, "repeats": 4,
         "requests": 50, "policies": ["fifo", "slo"], "concurrency": {"coarse": [8]},
     })
-    assert len(specs) == 6
+    assert len(specs) == 8
     assert {spec.policy for spec in specs} == {"fifo", "slo"}
     assert [(spec.repeat, spec.policy) for spec in specs] == [
         (0, "fifo"), (0, "slo"),
         (1, "slo"), (1, "fifo"),
         (2, "fifo"), (2, "slo"),
+        (3, "slo"), (3, "fifo"),
     ]
     assert specs[0].seed == specs[1].seed
     assert specs[2].seed == specs[3].seed
+
+
+def test_scheduler_specs_require_balanced_policy_order() -> None:
+    with pytest.raises(ValueError, match="balanced policy order"):
+        build_run_specs({
+            "name": "scheduler", "seed": 1, "repeats": 3,
+            "policies": ["fifo", "slo"], "concurrency": {"coarse": [8]},
+        })
 
 
 def test_suite_rows_record_reproducibility_and_cache_provenance(
@@ -101,7 +121,7 @@ def test_suite_rows_record_reproducibility_and_cache_provenance(
 
     config = {
         "name": "scheduler", "model": "open/model", "workload": "mixed",
-        "seed": 7, "repeats": 3, "requests": 5,
+        "seed": 7, "repeats": 4, "requests": 5,
         "policies": ["fifo", "slo"], "concurrency": {"coarse": [2]},
         "cache_isolation": "paired-alternating-shared-engine",
         "cache_state_initial": "warm-or-unknown",
@@ -127,7 +147,9 @@ def test_suite_rows_record_reproducibility_and_cache_provenance(
     assert all(row["requested_requests"] == 5 for row in rows)
     assert all(row["cache_isolation"] == "paired-alternating-shared-engine" for row in rows)
     assert all(row["cache_state_initial"] == "warm-or-unknown" for row in rows)
-    assert [row["policy"] for row in rows] == ["fifo", "slo", "slo", "fifo", "fifo", "slo"]
+    assert [row["policy"] for row in rows] == [
+        "fifo", "slo", "slo", "fifo", "fifo", "slo", "slo", "fifo",
+    ]
 
 
 def test_saturation_detects_throughput_plateau_with_ttft_growth() -> None:
@@ -232,11 +254,13 @@ def test_all_rejected_policy_run_is_inconclusive_not_a_crash(tmp_path: Path, mon
     monkeypatch.setattr("experiments.runner.append_state", capture_state)
     rows = [
         {"policy": "fifo", "concurrency": 8, "repeat": repeat,
-         "p95_ttft_ms": 100, "requests_per_second": 10}
+         "p95_ttft_ms": 100, "requests_per_second": 10,
+         "requests": 100, "successful": 100}
         for repeat in range(3)
     ] + [
         {"policy": "slo", "concurrency": 8, "repeat": repeat,
-         "p95_ttft_ms": None, "requests_per_second": 0}
+         "p95_ttft_ms": None, "requests_per_second": 0,
+         "requests": 100, "successful": 0, "rejections": 100}
         for repeat in range(3)
     ]
     compare_and_record_policies(
@@ -245,7 +269,25 @@ def test_all_rejected_policy_run_is_inconclusive_not_a_crash(tmp_path: Path, mon
     import json
     comparison = json.loads((tmp_path / "comparison.json").read_text())
     assert comparison["keep"] is False
+    assert comparison["completion_ratio"]["estimate"] == 0.0
     assert entries[0]["decision"] == "inconclusive"
+
+
+def test_mock_policy_artifact_cannot_serialize_keep_true(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr("experiments.runner.append_state", lambda *args, **kwargs: None)
+    rows = []
+    for repeat in range(3):
+        rows.extend([
+            {"policy": "fifo", "concurrency": 8, "repeat": repeat,
+             "p95_ttft_ms": 100, "requests_per_second": 10},
+            {"policy": "slo", "concurrency": 8, "repeat": repeat,
+             "p95_ttft_ms": 50, "requests_per_second": 10},
+        ])
+    compare_and_record_policies({"name": "scheduler"}, rows, tmp_path, "mock")
+    import json
+    comparison = json.loads((tmp_path / "comparison.json").read_text())
+    assert comparison["statistical_keep"] is True
+    assert comparison["keep"] is False
 
 
 def test_policy_artifact_records_completion_and_rejection_evidence(
