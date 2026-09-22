@@ -19,6 +19,17 @@ def test_measurement_derives_streaming_latencies() -> None:
     assert item.e2e_latency_ms == 700.0
 
 
+def test_stream_event_itl_does_not_invent_gaps_for_tokens_in_same_chunk() -> None:
+    item = measurement().model_copy(update={
+        "stream_event_timestamps": [1.4, 1.7],
+        "stream_timing_valid": True,
+        "token_timestamps": [],
+        "token_timing_exact": False,
+    })
+    assert item.inter_token_latencies_ms == [300.0]
+    assert item.tpot_ms == 200.0
+
+
 def test_jsonl_round_trip_and_parquet(tmp_path: Path) -> None:
     jsonl = tmp_path / "requests.jsonl"
     JsonlWriter(jsonl).write(measurement())

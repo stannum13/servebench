@@ -36,6 +36,7 @@ def summarize_measurements(items: list[RequestMeasurement]) -> dict[str, object]
     successful = [item for item in items if item.status == "ok"]
     ttft = [value for item in successful if (value := item.ttft_ms) is not None]
     itl = [value for item in successful for value in item.inter_token_latencies_ms]
+    tpot = [value for item in successful if (value := item.tpot_ms) is not None]
     e2e = [item.e2e_latency_ms for item in successful]
     queues = [item.queue_time_ms for item in successful if item.queue_time_ms is not None]
     router_admissions = [
@@ -63,6 +64,7 @@ def summarize_measurements(items: list[RequestMeasurement]) -> dict[str, object]
         "output_tokens_per_second": sum(item.output_tokens for item in successful) / duration,
         "ttft_ms": _percentiles(ttft),
         "inter_token_latency_ms": _percentiles(itl),
+        "tpot_ms": _percentiles(tpot),
         "e2e_latency_ms": _percentiles(e2e),
         "queue_time_ms": _percentiles(queues),
         "client_queue_time_ms": _percentiles(queues),

@@ -105,8 +105,9 @@ async def test_streamed_token_ids_and_usage_drive_actual_token_measurements(tmp_
     assert item.prompt_tokens == 512
     assert item.nominal_prompt_tokens == 256
     assert item.output_tokens == 2
-    assert item.token_timing_exact is True
-    assert len(item.token_timestamps) == 2
+    assert item.stream_timing_valid is True
+    assert len(item.stream_event_timestamps) == 1
+    assert item.inter_token_latencies_ms == []
 
 
 async def test_text_only_stream_does_not_claim_inter_token_timing(tmp_path: Path) -> None:

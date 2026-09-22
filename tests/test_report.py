@@ -38,6 +38,8 @@ def test_report_generates_three_graphs_and_evidence_tables(tmp_path: Path) -> No
     assert "TTFT improved within throughput constraint" in text
     assert "completion %" in text
     assert "rejection %" in text
+    assert "stream-event ITL" in text
+    assert "TPOT" in text
 
 
 def test_report_refuses_optimization_claim_with_too_few_repeats(tmp_path: Path) -> None:

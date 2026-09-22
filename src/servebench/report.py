@@ -217,6 +217,10 @@ def generate_report(
 
 {verdict}
 
+ITL is measured between non-empty streamed output events; it is stream-event ITL,
+not a fabricated per-token gap when one event contains multiple token IDs. TPOT is
+the elapsed time after the first token divided by the remaining output-token count.
+
 ## Key graphs
 
 ![Saturation curve](figures/saturation.png)

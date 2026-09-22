@@ -50,11 +50,11 @@
 - Consumes: `first_token_at`, `completed_at`, output-token count, per-SSE-event token IDs, and event timestamps.
 - Produces: stream-event ITL and request-level TPOT as distinct metrics; no artificial zero-duration ITL entries for several token IDs delivered by one SSE event.
 
-- [ ] **Step 1: Write failing tests** for a multi-token SSE event and for TPOT `(E2E - TTFT) / (output_tokens - 1)`.
-- [ ] **Step 2: Run the focused tests** and verify the semantic mismatch is exposed.
-- [ ] **Step 3: Store one timestamp per streamed output event, preserve the total token count, and add `tpot_ms` plus p50/p95/p99 aggregate output.**
-- [ ] **Step 4: Update report labels** so ITL says stream-event ITL and TPOT says per output token.
-- [ ] **Step 5: Re-run focused tests** and require all to pass.
+- [x] **Step 1: Write failing tests** for a multi-token SSE event and for TPOT `(E2E - TTFT) / (output_tokens - 1)`.
+- [x] **Step 2: Run the focused tests** and verify the semantic mismatch is exposed.
+- [x] **Step 3: Store one timestamp per streamed output event, preserve the total token count, and add `tpot_ms` plus p50/p95/p99 aggregate output.**
+- [x] **Step 4: Update report labels** so ITL says stream-event ITL and TPOT says per output token.
+- [x] **Step 5: Re-run focused tests** and require all to pass.
 
 ### Task 3: Cache isolation and run provenance
 

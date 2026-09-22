@@ -18,6 +18,7 @@ def test_summary_includes_latency_throughput_and_failures() -> None:
     assert summary["failures"] == 1
     assert summary["ttft_ms"]["p95"] == 100.0
     assert summary["output_tokens_per_second"] > 0
+    assert summary["tpot_ms"]["p95"] == 200.0
 
 
 def test_summary_separates_timeouts_and_overload_rejections() -> None:

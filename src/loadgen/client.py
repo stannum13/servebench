@@ -33,7 +33,7 @@ async def _request(
     semaphore: asyncio.Semaphore,
     scheduled_at: float,
 ) -> RequestMeasurement:
-    token_times: list[float] = []
+    stream_event_times: list[float] = []
     prompt_tokens = spec.prompt_tokens
     output_tokens = 0
     token_ids_seen = False
@@ -100,7 +100,7 @@ async def _request(
                             now = time.monotonic()
                             if token_ids:
                                 first_token = first_token or now
-                                token_times.extend([now] * len(token_ids))
+                                stream_event_times.append(now)
                                 if not usage:
                                     output_tokens += len(token_ids)
                         elif choice.get("text"):
@@ -125,8 +125,8 @@ async def _request(
         started_at=started,
         first_token_at=first_token,
         headers_received_at=headers_received_at,
-        token_timestamps=token_times,
-        token_timing_exact=token_ids_seen and len(token_times) == output_tokens,
+        stream_event_timestamps=stream_event_times,
+        stream_timing_valid=token_ids_seen,
         completed_at=completed,
         status=status,
         http_status_code=http_status_code,

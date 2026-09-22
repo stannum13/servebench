@@ -26,6 +26,8 @@ class RequestMeasurement(BaseModel):
     started_at: float
     first_token_at: float | None = None
     headers_received_at: float | None = None
+    stream_event_timestamps: list[float] = Field(default_factory=list)
+    stream_timing_valid: bool = False
     token_timestamps: list[float] = Field(default_factory=list)
     token_timing_exact: bool = False
     completed_at: float
@@ -60,12 +62,29 @@ class RequestMeasurement(BaseModel):
     @computed_field
     @property
     def inter_token_latencies_ms(self) -> list[float]:
-        if not self.token_timing_exact:
+        if self.stream_timing_valid:
+            timestamps = self.stream_event_timestamps
+        elif self.token_timing_exact:
+            # Backward compatibility for measurements written before stream-event
+            # timing was represented explicitly.
+            timestamps = self.token_timestamps
+        else:
             return []
         return [
             round((current - previous) * 1000, 6)
-            for previous, current in pairwise(self.token_timestamps)
+            for previous, current in pairwise(timestamps)
         ]
+
+    @computed_field
+    @property
+    def tpot_ms(self) -> float | None:
+        """Average post-first-token time per generated token."""
+        if self.first_token_at is None or self.output_tokens <= 1:
+            return None
+        return round(
+            (self.completed_at - self.first_token_at) * 1000 / (self.output_tokens - 1),
+            6,
+        )
 
     @computed_field
     @property
