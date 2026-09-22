@@ -3,72 +3,128 @@
     "requests": 12,
     "successful": 12,
     "failures": 0,
-    "duration_seconds": 0.9279221671167761,
-    "requests_per_second": 12.932119120816129,
-    "input_tokens_per_second": 19863.734969573576,
-    "output_tokens_per_second": 1655.3112474644645,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.8039300409145653,
+    "requests_per_second": 14.926671960595705,
+    "input_tokens_per_second": 22927.368131475003,
+    "output_tokens_per_second": 1910.6140109562502,
     "ttft_ms": {
-      "p50": 10.194917,
-      "p95": 29.350979,
-      "p99": 38.101296
+      "p50": 12.590104,
+      "p95": 17.20771,
+      "p99": 17.647876
     },
     "inter_token_latency_ms": {
-      "p50": 2.179083,
-      "p95": 3.437477,
-      "p99": 4.295552
+      "p50": 2.004167,
+      "p95": 2.518066,
+      "p99": 3.324252
+    },
+    "tpot_ms": {
+      "p50": 2.010143,
+      "p95": 2.029551,
+      "p99": 2.034328
     },
     "e2e_latency_ms": {
-      "p50": 295.968375,
-      "p95": 318.721807,
-      "p99": 320.284229
+      "p50": 266.018792,
+      "p95": 271.34874,
+      "p99": 272.096281
     },
     "queue_time_ms": {
-      "p50": 316.022708,
-      "p95": 633.939727,
-      "p99": 634.738345
+      "p50": 271.63125,
+      "p95": 540.976823,
+      "p99": 541.956465
     },
-    "kv_cache_peak": 0.0,
+    "client_queue_time_ms": {
+      "p50": 271.63125,
+      "p95": 540.976823,
+      "p99": 541.956465
+    },
+    "router_admission_ms": {
+      "p50": 0.152334,
+      "p95": 1.452852,
+      "p99": 2.047603
+    },
+    "post_header_ttft_ms": {
+      "p50": 4.196896,
+      "p95": 5.806984,
+      "p99": 6.218163
+    },
+    "kv_cache_peak": null,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
     "vllm_queue_peak": null,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
     "run_id": "fifo-c0004-r00",
     "policy": "fifo",
     "repeat": 0,
     "seed": 20260914,
     "concurrency": 4,
-    "p95_ttft_ms": 29.350979,
-    "evidence_kind": "mock"
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 0,
+    "p95_ttft_ms": 17.20771,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
   },
   {
     "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 0.8929128749296069,
-    "requests_per_second": 13.439161128621897,
-    "input_tokens_per_second": 20642.551493563235,
-    "output_tokens_per_second": 1720.2126244636029,
+    "successful": 0,
+    "failures": 12,
+    "timeouts": 0,
+    "rejections": 12,
+    "duration_seconds": 0.023747500032186508,
+    "requests_per_second": 0.0,
+    "input_tokens_per_second": 0.0,
+    "output_tokens_per_second": 0.0,
     "ttft_ms": {
-      "p50": 6.943833,
-      "p95": 27.445679,
-      "p99": 35.243836
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "inter_token_latency_ms": {
-      "p50": 2.072938,
-      "p95": 3.352433,
-      "p99": 4.085356
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "tpot_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "e2e_latency_ms": {
-      "p50": 291.798249,
-      "p95": 304.731189,
-      "p99": 305.443238
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "queue_time_ms": {
-      "p50": 295.844104,
-      "p95": 601.634481,
-      "p99": 601.847129
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "client_queue_time_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "router_admission_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "post_header_ttft_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -77,213 +133,152 @@
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
     "vllm_queue_peak": null,
-    "run_id": "fifo-c0004-r01",
-    "policy": "fifo",
-    "repeat": 1,
-    "seed": 20260915,
-    "concurrency": 4,
-    "p95_ttft_ms": 27.445679,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 0.8728482499718666,
-    "requests_per_second": 13.748094242483479,
-    "input_tokens_per_second": 21117.072756454625,
-    "output_tokens_per_second": 1759.7560630378853,
-    "ttft_ms": {
-      "p50": 9.177333,
-      "p95": 22.133302,
-      "p99": 28.931027
-    },
-    "inter_token_latency_ms": {
-      "p50": 2.042104,
-      "p95": 3.168733,
-      "p99": 3.780373
-    },
-    "e2e_latency_ms": {
-      "p50": 277.710625,
-      "p95": 313.114913,
-      "p99": 319.811383
-    },
-    "queue_time_ms": {
-      "p50": 320.992958,
-      "p95": 595.180346,
-      "p99": 595.393635
-    },
-    "kv_cache_peak": null,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0004-r02",
-    "policy": "fifo",
-    "repeat": 2,
-    "seed": 20260916,
-    "concurrency": 4,
-    "p95_ttft_ms": 22.133302,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 0.9538635418284684,
-    "requests_per_second": 12.580415828659419,
-    "input_tokens_per_second": 19323.518712820867,
-    "output_tokens_per_second": 1610.2932260684056,
-    "ttft_ms": {
-      "p50": 9.538041,
-      "p95": 20.187733,
-      "p99": 24.955279
-    },
-    "inter_token_latency_ms": {
-      "p50": 2.347354,
-      "p95": 3.512838,
-      "p99": 4.17084
-    },
-    "e2e_latency_ms": {
-      "p50": 312.714645,
-      "p95": 327.943987,
-      "p99": 331.28333
-    },
-    "queue_time_ms": {
-      "p50": 336.645604,
-      "p95": 651.261525,
-      "p99": 651.549139
-    },
-    "kv_cache_peak": 0.0,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
     "run_id": "slo-c0004-r00",
     "policy": "slo",
     "repeat": 0,
     "seed": 20260914,
     "concurrency": 4,
-    "p95_ttft_ms": 20.187733,
-    "evidence_kind": "mock"
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 1,
+    "p95_ttft_ms": null,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
   },
   {
     "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 0.9532802090980113,
-    "requests_per_second": 12.588114056573499,
-    "input_tokens_per_second": 19335.343190896896,
-    "output_tokens_per_second": 1611.2785992414078,
+    "successful": 0,
+    "failures": 12,
+    "timeouts": 0,
+    "rejections": 12,
+    "duration_seconds": 0.024831916205585003,
+    "requests_per_second": 0.0,
+    "input_tokens_per_second": 0.0,
+    "output_tokens_per_second": 0.0,
     "ttft_ms": {
-      "p50": 7.49425,
-      "p95": 24.78792,
-      "p99": 30.828351
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "inter_token_latency_ms": {
-      "p50": 2.244,
-      "p95": 3.424264,
-      "p99": 4.242946
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "tpot_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "e2e_latency_ms": {
-      "p50": 309.207105,
-      "p95": 322.164317,
-      "p99": 322.47063
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
     "queue_time_ms": {
-      "p50": 324.010708,
-      "p95": 631.285181,
-      "p99": 631.40037
+      "p50": null,
+      "p95": null,
+      "p99": null
     },
-    "kv_cache_peak": 0.0,
+    "client_queue_time_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "router_admission_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "post_header_ttft_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "kv_cache_peak": null,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
     "vllm_queue_peak": null,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
     "run_id": "slo-c0004-r01",
     "policy": "slo",
     "repeat": 1,
     "seed": 20260915,
     "concurrency": 4,
-    "p95_ttft_ms": 24.78792,
-    "evidence_kind": "mock"
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 2,
+    "p95_ttft_ms": null,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
   },
   {
     "requests": 12,
     "successful": 12,
     "failures": 0,
-    "duration_seconds": 0.9522474168334156,
-    "requests_per_second": 12.601766923038298,
-    "input_tokens_per_second": 19356.313993786825,
-    "output_tokens_per_second": 1613.0261661489021,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.7991807917132974,
+    "requests_per_second": 15.01537590045701,
+    "input_tokens_per_second": 23063.61738310197,
+    "output_tokens_per_second": 1921.9681152584974,
     "ttft_ms": {
-      "p50": 7.358125,
-      "p95": 22.708491,
-      "p99": 29.712631
+      "p50": 8.269896,
+      "p95": 20.768863,
+      "p99": 20.902806
     },
     "inter_token_latency_ms": {
-      "p50": 2.289084,
-      "p95": 3.464222,
-      "p99": 4.195749
+      "p50": 1.987958,
+      "p95": 2.638461,
+      "p99": 3.341656
+    },
+    "tpot_ms": {
+      "p50": 1.998731,
+      "p95": 2.011632,
+      "p99": 2.01359
     },
     "e2e_latency_ms": {
-      "p50": 314.799458,
-      "p95": 320.782646,
-      "p99": 321.817929
+      "p50": 262.230584,
+      "p95": 275.514911,
+      "p99": 275.763749
     },
     "queue_time_ms": {
-      "p50": 315.548854,
-      "p95": 632.257246,
-      "p99": 632.470316
+      "p50": 275.624063,
+      "p95": 539.847817,
+      "p99": 540.03753
     },
-    "kv_cache_peak": null,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "slo-c0004-r02",
-    "policy": "slo",
-    "repeat": 2,
-    "seed": 20260916,
-    "concurrency": 4,
-    "p95_ttft_ms": 22.708491,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 3.5777286251541227,
-    "requests_per_second": 3.354083346520744,
-    "input_tokens_per_second": 5151.8720202558625,
-    "output_tokens_per_second": 429.3226683546552,
-    "ttft_ms": {
-      "p50": 21.700291,
-      "p95": 78.448133,
-      "p99": 128.937327
+    "client_queue_time_ms": {
+      "p50": 275.624063,
+      "p95": 539.847817,
+      "p99": 540.03753
     },
-    "inter_token_latency_ms": {
-      "p50": 2.067584,
-      "p95": 5.033685,
-      "p99": 8.242757
+    "router_admission_ms": {
+      "p50": 0.271271,
+      "p95": 1.623012,
+      "p99": 1.983703
     },
-    "e2e_latency_ms": {
-      "p50": 280.462417,
-      "p95": 358.528573,
-      "p99": 400.583682
-    },
-    "queue_time_ms": {
-      "p50": 1738.908604,
-      "p95": 3149.914127,
-      "p99": 3270.781925
+    "post_header_ttft_ms": {
+      "p50": 4.097729,
+      "p95": 6.018806,
+      "p99": 6.802061
     },
     "kv_cache_peak": 0.0,
     "preemptions": null,
@@ -292,356 +287,772 @@
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
     "vllm_queue_peak": null,
-    "run_id": "fifo-c0001-r00",
-    "policy": "fifo",
-    "repeat": 0,
-    "seed": 20260914,
-    "concurrency": 1,
-    "p95_ttft_ms": 78.448133,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 3.307111583882943,
-    "requests_per_second": 3.628544031741007,
-    "input_tokens_per_second": 5573.443632754186,
-    "output_tokens_per_second": 464.4536360628489,
-    "ttft_ms": {
-      "p50": 5.134062,
-      "p95": 85.798696,
-      "p99": 127.795339
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.997041,
-      "p95": 2.906006,
-      "p99": 4.487675
-    },
-    "e2e_latency_ms": {
-      "p50": 259.962041,
-      "p95": 334.312177,
-      "p99": 376.799035
-    },
-    "queue_time_ms": {
-      "p50": 1619.4875,
-      "p95": 2905.043303,
-      "p99": 3018.789628
-    },
-    "kv_cache_peak": 0.0,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0001-r01",
-    "policy": "fifo",
-    "repeat": 1,
-    "seed": 20260915,
-    "concurrency": 1,
-    "p95_ttft_ms": 85.798696,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 3.132126959040761,
-    "requests_per_second": 3.8312623201184337,
-    "input_tokens_per_second": 5884.818923701914,
-    "output_tokens_per_second": 490.4015769751595,
-    "ttft_ms": {
-      "p50": 5.202896,
-      "p95": 13.45224,
-      "p99": 20.836082
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.992938,
-      "p95": 2.412133,
-      "p99": 2.638212
-    },
-    "e2e_latency_ms": {
-      "p50": 260.116375,
-      "p95": 269.08274,
-      "p99": 276.129982
-    },
-    "queue_time_ms": {
-      "p50": 1449.335229,
-      "p95": 2730.46168,
-      "p99": 2845.060303
-    },
-    "kv_cache_peak": 0.0,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0001-r02",
-    "policy": "fifo",
-    "repeat": 2,
-    "seed": 20260916,
-    "concurrency": 1,
-    "p95_ttft_ms": 13.45224,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 1.7248354591429234,
-    "requests_per_second": 6.957185357241462,
-    "input_tokens_per_second": 10686.236708722885,
-    "output_tokens_per_second": 890.5197257269072,
-    "ttft_ms": {
-      "p50": 9.173459,
-      "p95": 30.392575,
-      "p99": 37.965415
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.98227,
-      "p95": 2.720214,
-      "p99": 4.737076
-    },
-    "e2e_latency_ms": {
-      "p50": 269.011208,
-      "p95": 347.357829,
-      "p99": 348.152066
-    },
-    "queue_time_ms": {
-      "p50": 792.140521,
-      "p95": 1454.82809,
-      "p99": 1455.331285
-    },
-    "kv_cache_peak": null,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0002-r00",
-    "policy": "fifo",
-    "repeat": 0,
-    "seed": 20260914,
-    "concurrency": 2,
-    "p95_ttft_ms": 30.392575,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 1.5898640831001103,
-    "requests_per_second": 7.547815016111906,
-    "input_tokens_per_second": 11593.443864747887,
-    "output_tokens_per_second": 966.120322062324,
-    "ttft_ms": {
-      "p50": 5.968625,
-      "p95": 16.239894,
-      "p99": 23.199979
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.991354,
-      "p95": 2.354495,
-      "p99": 2.549292
-    },
-    "e2e_latency_ms": {
-      "p50": 261.750459,
-      "p95": 271.59912,
-      "p99": 278.279457
-    },
-    "queue_time_ms": {
-      "p50": 673.889791,
-      "p95": 1328.280112,
-      "p99": 1328.495455
-    },
-    "kv_cache_peak": 0.0,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0002-r01",
-    "policy": "fifo",
-    "repeat": 1,
-    "seed": 20260915,
-    "concurrency": 2,
-    "p95_ttft_ms": 16.239894,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 1.5904194170143455,
-    "requests_per_second": 7.545179511532435,
-    "input_tokens_per_second": 11589.39572971382,
-    "output_tokens_per_second": 965.7829774761517,
-    "ttft_ms": {
-      "p50": 6.25423,
-      "p95": 16.978177,
-      "p99": 23.733003
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.990187,
-      "p95": 2.375739,
-      "p99": 2.583552
-    },
-    "e2e_latency_ms": {
-      "p50": 262.758354,
-      "p95": 271.651019,
-      "p99": 278.651071
-    },
-    "queue_time_ms": {
-      "p50": 674.178854,
-      "p95": 1329.602681,
-      "p99": 1330.400236
-    },
-    "kv_cache_peak": 0.0,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0002-r02",
-    "policy": "fifo",
-    "repeat": 2,
-    "seed": 20260916,
-    "concurrency": 2,
-    "p95_ttft_ms": 16.978177,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 0.8085609578993171,
-    "requests_per_second": 14.841181586576496,
-    "input_tokens_per_second": 22796.0549169815,
-    "output_tokens_per_second": 1899.6712430817915,
-    "ttft_ms": {
-      "p50": 6.87952,
-      "p95": 19.916739,
-      "p99": 25.986448
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.990542,
-      "p95": 2.469248,
-      "p99": 2.947781
-    },
-    "e2e_latency_ms": {
-      "p50": 261.509083,
-      "p95": 277.054412,
-      "p99": 283.758949
-    },
-    "queue_time_ms": {
-      "p50": 285.957166,
-      "p95": 548.641606,
-      "p99": 549.377855
-    },
-    "kv_cache_peak": null,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
-    "run_id": "fifo-c0004-r00",
-    "policy": "fifo",
-    "repeat": 0,
-    "seed": 20260914,
-    "concurrency": 4,
-    "p95_ttft_ms": 19.916739,
-    "evidence_kind": "mock"
-  },
-  {
-    "requests": 12,
-    "successful": 12,
-    "failures": 0,
-    "duration_seconds": 0.8074455829337239,
-    "requests_per_second": 14.861682636741817,
-    "input_tokens_per_second": 22827.544530035433,
-    "output_tokens_per_second": 1902.2953775029525,
-    "ttft_ms": {
-      "p50": 6.309938,
-      "p95": 20.615239,
-      "p99": 25.639214
-    },
-    "inter_token_latency_ms": {
-      "p50": 1.993438,
-      "p95": 2.401429,
-      "p99": 2.849598
-    },
-    "e2e_latency_ms": {
-      "p50": 260.52075,
-      "p95": 277.430043,
-      "p99": 282.717541
-    },
-    "queue_time_ms": {
-      "p50": 285.738958,
-      "p95": 547.006954,
-      "p99": 547.314991
-    },
-    "kv_cache_peak": 0.0,
-    "preemptions": null,
-    "prefix_cache_hit_rate": null,
-    "gpu_utilization_peak": null,
-    "gpu_memory_peak_mib": null,
-    "gpu_power_average_watts": null,
-    "vllm_queue_peak": null,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
     "run_id": "fifo-c0004-r01",
     "policy": "fifo",
     "repeat": 1,
     "seed": 20260915,
     "concurrency": 4,
-    "p95_ttft_ms": 20.615239,
-    "evidence_kind": "mock"
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 3,
+    "p95_ttft_ms": 20.768863,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
   },
   {
     "requests": 12,
     "successful": 12,
     "failures": 0,
-    "duration_seconds": 0.8082322091795504,
-    "requests_per_second": 14.847218242120533,
-    "input_tokens_per_second": 22805.32721989714,
-    "output_tokens_per_second": 1900.4439349914283,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.8071643752045929,
+    "requests_per_second": 14.866860293429507,
+    "input_tokens_per_second": 22835.497410707725,
+    "output_tokens_per_second": 1902.958117558977,
     "ttft_ms": {
-      "p50": 7.189958,
-      "p95": 19.535952,
-      "p99": 26.370123
+      "p50": 9.332916,
+      "p95": 15.052544,
+      "p99": 16.623509
     },
     "inter_token_latency_ms": {
-      "p50": 1.997959,
-      "p95": 2.392048,
-      "p99": 2.680529
+      "p50": 1.989313,
+      "p95": 2.799904,
+      "p99": 3.683029
+    },
+    "tpot_ms": {
+      "p50": 2.035864,
+      "p95": 2.054445,
+      "p99": 2.060322
     },
     "e2e_latency_ms": {
-      "p50": 261.923563,
-      "p95": 275.956194,
-      "p99": 282.593539
+      "p50": 268.000958,
+      "p95": 274.89135,
+      "p99": 274.988003
     },
     "queue_time_ms": {
-      "p50": 284.194084,
-      "p95": 545.820938,
-      "p99": 545.940288
+      "p50": 274.660959,
+      "p95": 539.015317,
+      "p99": 539.139031
     },
-    "kv_cache_peak": 0.0,
+    "client_queue_time_ms": {
+      "p50": 274.660959,
+      "p95": 539.015317,
+      "p99": 539.139031
+    },
+    "router_admission_ms": {
+      "p50": 0.154334,
+      "p95": 3.129671,
+      "p99": 3.939968
+    },
+    "post_header_ttft_ms": {
+      "p50": 3.704146,
+      "p95": 5.126294,
+      "p99": 5.245626
+    },
+    "kv_cache_peak": null,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
     "gpu_memory_peak_mib": null,
     "gpu_power_average_watts": null,
     "vllm_queue_peak": null,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
     "run_id": "fifo-c0004-r02",
     "policy": "fifo",
     "repeat": 2,
     "seed": 20260916,
     "concurrency": 4,
-    "p95_ttft_ms": 19.535952,
-    "evidence_kind": "mock"
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 4,
+    "p95_ttft_ms": 15.052544,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 0,
+    "failures": 12,
+    "timeouts": 0,
+    "rejections": 12,
+    "duration_seconds": 0.024385583121329546,
+    "requests_per_second": 0.0,
+    "input_tokens_per_second": 0.0,
+    "output_tokens_per_second": 0.0,
+    "ttft_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "inter_token_latency_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "tpot_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "e2e_latency_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "queue_time_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "client_queue_time_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "router_admission_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "post_header_ttft_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "kv_cache_peak": null,
+    "preemptions": null,
+    "prefix_cache_hit_rate": null,
+    "gpu_utilization_peak": null,
+    "gpu_memory_peak_mib": null,
+    "gpu_power_average_watts": null,
+    "vllm_queue_peak": null,
+    "vllm_queue_mean_ms": null,
+    "vllm_prefill_mean_ms": null,
+    "vllm_ttft_mean_ms": null,
+    "vllm_decode_mean_ms": null,
+    "run_id": "slo-c0004-r02",
+    "policy": "slo",
+    "repeat": 2,
+    "seed": 20260916,
+    "concurrency": 4,
+    "suite": "mock-scheduler",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown",
+    "execution_order": 5,
+    "p95_ttft_ms": null,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 3.143743291962892,
+    "requests_per_second": 3.8171055603294617,
+    "input_tokens_per_second": 5863.074140666053,
+    "output_tokens_per_second": 488.5895117221711,
+    "ttft_ms": {
+      "p50": 5.329042,
+      "p95": 8.821121,
+      "p99": 9.052524
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.988375,
+      "p95": 2.43979,
+      "p99": 2.918343
+    },
+    "tpot_ms": {
+      "p50": 2.005878,
+      "p95": 2.040971,
+      "p99": 2.052259
+    },
+    "e2e_latency_ms": {
+      "p50": 260.18577,
+      "p95": 265.578269,
+      "p99": 266.173021
+    },
+    "queue_time_ms": {
+      "p50": 1450.830896,
+      "p95": 2741.162596,
+      "p99": 2855.124687
+    },
+    "client_queue_time_ms": {
+      "p50": 1450.830896,
+      "p95": 2741.162596,
+      "p99": 2855.124687
+    },
+    "router_admission_ms": {
+      "p50": 0.11752,
+      "p95": 1.185648,
+      "p99": 1.466863
+    },
+    "post_header_ttft_ms": {
+      "p50": 2.939958,
+      "p95": 3.693234,
+      "p99": 3.80008
+    },
+    "run_id": "fifo-c0001-r00",
+    "policy": "fifo",
+    "repeat": 0,
+    "seed": 20260914,
+    "concurrency": 1,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 0,
+    "p95_ttft_ms": 8.821121,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 3.122686709277332,
+    "requests_per_second": 3.8428446774210987,
+    "input_tokens_per_second": 5902.609424518808,
+    "output_tokens_per_second": 491.88411870990063,
+    "ttft_ms": {
+      "p50": 4.620626,
+      "p95": 8.574681,
+      "p99": 9.35427
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.993605,
+      "p95": 2.286077,
+      "p99": 2.490185
+    },
+    "tpot_ms": {
+      "p50": 2.005085,
+      "p95": 2.018566,
+      "p99": 2.021599
+    },
+    "e2e_latency_ms": {
+      "p50": 259.821833,
+      "p95": 262.549394,
+      "p99": 263.394212
+    },
+    "queue_time_ms": {
+      "p50": 1434.058625,
+      "p95": 2721.175844,
+      "p99": 2835.133369
+    },
+    "client_queue_time_ms": {
+      "p50": 1434.058625,
+      "p95": 2721.175844,
+      "p99": 2835.133369
+    },
+    "router_admission_ms": {
+      "p50": 0.106458,
+      "p95": 1.739052,
+      "p99": 1.750877
+    },
+    "post_header_ttft_ms": {
+      "p50": 2.573396,
+      "p95": 3.588427,
+      "p99": 3.677985
+    },
+    "run_id": "fifo-c0001-r01",
+    "policy": "fifo",
+    "repeat": 1,
+    "seed": 20260915,
+    "concurrency": 1,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 1,
+    "p95_ttft_ms": 8.574681,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 3.1641865829005837,
+    "requests_per_second": 3.7924438668846445,
+    "input_tokens_per_second": 5825.193779534814,
+    "output_tokens_per_second": 485.4328149612345,
+    "ttft_ms": {
+      "p50": 6.623729,
+      "p95": 11.087685,
+      "p99": 13.07137
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.993938,
+      "p95": 2.525034,
+      "p99": 3.234971
+    },
+    "tpot_ms": {
+      "p50": 2.015772,
+      "p95": 2.046339,
+      "p99": 2.055906
+    },
+    "e2e_latency_ms": {
+      "p50": 263.243438,
+      "p95": 269.038291,
+      "p99": 270.177892
+    },
+    "queue_time_ms": {
+      "p50": 1451.674729,
+      "p95": 2760.645486,
+      "p99": 2874.440431
+    },
+    "client_queue_time_ms": {
+      "p50": 1451.674729,
+      "p95": 2760.645486,
+      "p99": 2874.440431
+    },
+    "router_admission_ms": {
+      "p50": 0.175834,
+      "p95": 1.638327,
+      "p99": 1.706032
+    },
+    "post_header_ttft_ms": {
+      "p50": 3.077854,
+      "p95": 4.702006,
+      "p99": 4.819468
+    },
+    "run_id": "fifo-c0001-r02",
+    "policy": "fifo",
+    "repeat": 2,
+    "seed": 20260916,
+    "concurrency": 1,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 2,
+    "p95_ttft_ms": 11.087685,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 1.5876609589904547,
+    "requests_per_second": 7.558288771949418,
+    "input_tokens_per_second": 11609.531553714307,
+    "output_tokens_per_second": 967.4609628095255,
+    "ttft_ms": {
+      "p50": 8.629146,
+      "p95": 10.867863,
+      "p99": 10.95414
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.994542,
+      "p95": 2.686027,
+      "p99": 3.346821
+    },
+    "tpot_ms": {
+      "p50": 2.011928,
+      "p95": 2.033157,
+      "p99": 2.036172
+    },
+    "e2e_latency_ms": {
+      "p50": 264.516875,
+      "p95": 266.997823,
+      "p99": 267.534165
+    },
+    "queue_time_ms": {
+      "p50": 658.551792,
+      "p95": 1322.482812,
+      "p99": 1323.646062
+    },
+    "client_queue_time_ms": {
+      "p50": 658.551792,
+      "p95": 1322.482812,
+      "p99": 1323.646062
+    },
+    "router_admission_ms": {
+      "p50": 0.159229,
+      "p95": 2.068302,
+      "p99": 3.028328
+    },
+    "post_header_ttft_ms": {
+      "p50": 4.29525,
+      "p95": 5.259985,
+      "p99": 5.48433
+    },
+    "run_id": "fifo-c0002-r00",
+    "policy": "fifo",
+    "repeat": 0,
+    "seed": 20260914,
+    "concurrency": 2,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 3,
+    "p95_ttft_ms": 10.867863,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 1.5956287500448525,
+    "requests_per_second": 7.520546367482213,
+    "input_tokens_per_second": 11551.55922045268,
+    "output_tokens_per_second": 962.6299350377233,
+    "ttft_ms": {
+      "p50": 8.516,
+      "p95": 15.747356,
+      "p99": 16.484338
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.994458,
+      "p95": 2.598475,
+      "p99": 3.174219
+    },
+    "tpot_ms": {
+      "p50": 2.020854,
+      "p95": 2.032729,
+      "p99": 2.035435
+    },
+    "e2e_latency_ms": {
+      "p50": 265.013688,
+      "p95": 270.054509,
+      "p99": 271.162135
+    },
+    "queue_time_ms": {
+      "p50": 669.722105,
+      "p95": 1332.275652,
+      "p99": 1332.609997
+    },
+    "client_queue_time_ms": {
+      "p50": 669.722105,
+      "p95": 1332.275652,
+      "p99": 1332.609997
+    },
+    "router_admission_ms": {
+      "p50": 0.167291,
+      "p95": 1.390221,
+      "p99": 1.939011
+    },
+    "post_header_ttft_ms": {
+      "p50": 3.899708,
+      "p95": 6.018739,
+      "p99": 6.369914
+    },
+    "run_id": "fifo-c0002-r01",
+    "policy": "fifo",
+    "repeat": 1,
+    "seed": 20260915,
+    "concurrency": 2,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 4,
+    "p95_ttft_ms": 15.747356,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 1.6008425829932094,
+    "requests_per_second": 7.496052471044808,
+    "input_tokens_per_second": 11513.936595524825,
+    "output_tokens_per_second": 959.4947162937355,
+    "ttft_ms": {
+      "p50": 9.519813,
+      "p95": 13.003625,
+      "p99": 13.384225
+    },
+    "inter_token_latency_ms": {
+      "p50": 2.001499,
+      "p95": 2.624847,
+      "p99": 3.165249
+    },
+    "tpot_ms": {
+      "p50": 2.023911,
+      "p95": 2.03252,
+      "p99": 2.036266
+    },
+    "e2e_latency_ms": {
+      "p50": 266.451292,
+      "p95": 269.514844,
+      "p99": 269.613935
+    },
+    "queue_time_ms": {
+      "p50": 668.895708,
+      "p95": 1336.430818,
+      "p99": 1337.362096
+    },
+    "client_queue_time_ms": {
+      "p50": 668.895708,
+      "p95": 1336.430818,
+      "p99": 1337.362096
+    },
+    "router_admission_ms": {
+      "p50": 0.185896,
+      "p95": 2.491936,
+      "p99": 2.636054
+    },
+    "post_header_ttft_ms": {
+      "p50": 4.541645,
+      "p95": 5.277023,
+      "p99": 5.396905
+    },
+    "run_id": "fifo-c0002-r02",
+    "policy": "fifo",
+    "repeat": 2,
+    "seed": 20260916,
+    "concurrency": 2,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 5,
+    "p95_ttft_ms": 13.003625,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.7993617919273674,
+    "requests_per_second": 15.011975955301049,
+    "input_tokens_per_second": 23058.39506734241,
+    "output_tokens_per_second": 1921.5329222785342,
+    "ttft_ms": {
+      "p50": 8.426708,
+      "p95": 14.667639,
+      "p99": 15.101094
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.997313,
+      "p95": 2.37505,
+      "p99": 3.925969
+    },
+    "tpot_ms": {
+      "p50": 2.006543,
+      "p95": 2.052205,
+      "p99": 2.060599
+    },
+    "e2e_latency_ms": {
+      "p50": 266.59477,
+      "p95": 269.222521,
+      "p99": 269.386604
+    },
+    "queue_time_ms": {
+      "p50": 268.089542,
+      "p95": 531.639554,
+      "p99": 531.844777
+    },
+    "client_queue_time_ms": {
+      "p50": 268.089542,
+      "p95": 531.639554,
+      "p99": 531.844777
+    },
+    "router_admission_ms": {
+      "p50": 0.543855,
+      "p95": 1.071298,
+      "p99": 1.082427
+    },
+    "post_header_ttft_ms": {
+      "p50": 3.784437,
+      "p95": 5.065766,
+      "p99": 5.098986
+    },
+    "run_id": "fifo-c0004-r00",
+    "policy": "fifo",
+    "repeat": 0,
+    "seed": 20260914,
+    "concurrency": 4,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 6,
+    "p95_ttft_ms": 14.667639,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.7919441252015531,
+    "requests_per_second": 15.152584150991649,
+    "input_tokens_per_second": 23274.369255923175,
+    "output_tokens_per_second": 1939.530771326931,
+    "ttft_ms": {
+      "p50": 9.038042,
+      "p95": 14.467887,
+      "p99": 14.717478
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.997791,
+      "p95": 2.475358,
+      "p99": 2.830104
+    },
+    "tpot_ms": {
+      "p50": 1.998543,
+      "p95": 2.018427,
+      "p99": 2.01919
+    },
+    "e2e_latency_ms": {
+      "p50": 262.088875,
+      "p95": 269.505483,
+      "p99": 269.555497
+    },
+    "queue_time_ms": {
+      "p50": 269.188625,
+      "p95": 528.737644,
+      "p99": 528.986262
+    },
+    "client_queue_time_ms": {
+      "p50": 269.188625,
+      "p95": 528.737644,
+      "p99": 528.986262
+    },
+    "router_admission_ms": {
+      "p50": 0.328083,
+      "p95": 2.579881,
+      "p99": 2.920643
+    },
+    "post_header_ttft_ms": {
+      "p50": 3.97977,
+      "p95": 4.95029,
+      "p99": 4.964425
+    },
+    "run_id": "fifo-c0004-r01",
+    "policy": "fifo",
+    "repeat": 1,
+    "seed": 20260915,
+    "concurrency": 4,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 7,
+    "p95_ttft_ms": 14.467887,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
+  },
+  {
+    "requests": 12,
+    "successful": 12,
+    "failures": 0,
+    "timeouts": 0,
+    "rejections": 0,
+    "duration_seconds": 0.8037650003097951,
+    "requests_per_second": 14.929736919839556,
+    "input_tokens_per_second": 22932.075908873558,
+    "output_tokens_per_second": 1911.0063257394631,
+    "ttft_ms": {
+      "p50": 14.169521,
+      "p95": 15.9378,
+      "p99": 16.173126
+    },
+    "inter_token_latency_ms": {
+      "p50": 1.997125,
+      "p95": 2.436273,
+      "p99": 3.174498
+    },
+    "tpot_ms": {
+      "p50": 2.000916,
+      "p95": 2.011637,
+      "p99": 2.016251
+    },
+    "e2e_latency_ms": {
+      "p50": 267.427271,
+      "p95": 270.970722,
+      "p99": 271.082611
+    },
+    "queue_time_ms": {
+      "p50": 271.290396,
+      "p95": 540.263762,
+      "p99": 540.449919
+    },
+    "client_queue_time_ms": {
+      "p50": 271.290396,
+      "p95": 540.263762,
+      "p99": 540.449919
+    },
+    "router_admission_ms": {
+      "p50": 0.47477,
+      "p95": 1.306712,
+      "p99": 1.346642
+    },
+    "post_header_ttft_ms": {
+      "p50": 3.820104,
+      "p95": 4.620656,
+      "p99": 4.653931
+    },
+    "run_id": "fifo-c0004-r02",
+    "policy": "fifo",
+    "repeat": 2,
+    "seed": 20260916,
+    "concurrency": 4,
+    "suite": "mock-saturation",
+    "workload": "mixed",
+    "requested_requests": 12,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "cache_isolation": "shared-engine-no-reset",
+    "cache_state_initial": "cold-after-deployment-then-warming",
+    "execution_order": 8,
+    "p95_ttft_ms": 15.9378,
+    "evidence_kind": "mock",
+    "evidence_requested": "mock"
   }
 ]

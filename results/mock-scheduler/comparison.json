@@ -1,16 +1,29 @@
 {
   "keep": false,
-  "ttft_delta_ms": {
-    "estimate": -2.6577589999999987,
-    "low": -9.163246,
-    "high": 0.575189,
-    "confidence": 0.95
+  "ttft_delta_ms": null,
+  "throughput_ratio": null,
+  "completion_ratio": null,
+  "policy_totals": {
+    "fifo": {
+      "requests": 36,
+      "successful": 36,
+      "rejections": 0,
+      "timeouts": 0,
+      "failures": 0
+    },
+    "slo": {
+      "requests": 36,
+      "successful": 0,
+      "rejections": 36,
+      "timeouts": 0,
+      "failures": 36
+    }
   },
-  "throughput_ratio": {
-    "estimate": 0.93667409268307,
-    "low": 0.916619,
-    "high": 0.972804,
-    "confidence": 0.95
+  "provenance": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "workload": "mixed",
+    "cache_isolation": "paired-alternating-shared-engine",
+    "cache_state_initial": "warm-or-unknown"
   },
-  "reason": "confidence or throughput constraint failed"
+  "reason": "one or more policy runs had no successful first token"
 }

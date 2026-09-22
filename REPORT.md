@@ -4,12 +4,16 @@
 
 ## Latency / throughput / cost
 
-| policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | power (W) | $ / 1M output tokens |
-|---|---:|---:|---:|---:|
-| fifo | 23.17 [20.32, 26.26] | 14.11 [13.47, 14.67] | unavailable | not configured |
-| slo | 22.56 [20.19, 24.79] | 12.59 [12.58, 12.60] | unavailable | not configured |
+| policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | completion % | rejection % | power (W) | $ / 1M output tokens |
+|---|---:|---:|---:|---:|---:|---:|
+| fifo | 16.35 [14.91, 18.17] | 14.98 [14.91, 15.06] | 100.00 | 0.00 | unavailable | not configured |
+| slo | unavailable | 0.00 [0.00, 0.00] | 0.00 | 100.00 | unavailable | not configured |
 
-Mock evidence only: repeated measurements exist, but no optimization claim is made.
+One or more policy runs had no first token: no optimization claim is made.
+
+ITL is measured between non-empty streamed output events; it is stream-event ITL,
+not a fabricated per-token gap when one event contains multiple token IDs. TPOT is
+the elapsed time after the first token divided by the remaining output-token count.
 
 ## Key graphs
 
@@ -17,7 +21,7 @@ Mock evidence only: repeated measurements exist, but no optimization claim is ma
 
 ![Latency decomposition](figures/latency-decomposition.png)
 
-Stage measurements unavailable in these legacy runs. The queue series in the figure is client queue (loadgen semaphore wait), not router or vLLM queue.
+Client queue is loadgen semaphore wait and is outside TTFT. Router admission is measured inside the router; post-header TTFT includes backend queue, prefill, and transport. Run-scoped vLLM queue and prefill means are unavailable and unavailable, respectively. These p95 stage percentiles are not additive.
 
 ![Scheduler comparison](figures/scheduler-comparison.png)
 

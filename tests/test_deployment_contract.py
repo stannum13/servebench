@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import yaml
@@ -39,3 +40,27 @@ def test_docker_build_copies_package_readme_before_install() -> None:
     readme_copy = next(index for index, line in enumerate(lines) if "README.md" in line)
     install = next(index for index, line in enumerate(lines) if "pip install" in line)
     assert readme_copy < install
+
+
+def test_committed_results_cover_decision_and_timing_contract() -> None:
+    comparison = json.loads(Path("results/mock-scheduler/comparison.json").read_text())
+    assert {"completion_ratio", "policy_totals", "provenance"} <= comparison.keys()
+    assert {"requests", "successful", "rejections", "timeouts", "failures"} <= (
+        comparison["policy_totals"]["slo"].keys()
+    )
+
+    summary = json.loads(Path("results/smoke/summary.json").read_text())
+    assert {"inter_token_latency_ms", "tpot_ms"} <= summary.keys()
+
+    runs = json.loads(Path("results/mock-scheduler/runs.json").read_text())
+    required = {
+        "model", "workload", "requested_requests", "seed",
+        "cache_isolation", "cache_state_initial", "execution_order",
+    }
+    assert runs and all(required <= row.keys() for row in runs)
+
+
+def test_three_required_graph_artifacts_exist() -> None:
+    assert all(Path("figures", name).is_file() for name in (
+        "saturation.png", "latency-decomposition.png", "scheduler-comparison.png",
+    ))

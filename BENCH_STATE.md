@@ -4,13 +4,18 @@
 
 - Phase: backend smoke verified; GPU baseline pending
 - Latest run: `results/smoke/requests.jsonl` (mock backend, 8/8 successful)
-- Smoke observation (2026-09-15): p95 TTFT 27.90 ms, p95 inter-token latency 2.91 ms;
-  p95 router admission 0.54 ms and p95 post-header TTFT 21.88 ms. Eight exact
-  256-token prompts produced 128 timed token IDs each; not GPU evidence.
+- Smoke observation (2026-09-22): p95 TTFT 21.92 ms, p95 stream-event ITL 2.67 ms,
+  p95 TPOT 2.03 ms, p95 router admission 0.45 ms, and p95 post-header TTFT 15.79 ms.
+  Eight 256-token prompts produced 128 token IDs each; not GPU evidence.
 - Baseline saturation run: pending NVIDIA GPU environment
 - Current bottleneck: pending measurement
 - Active hypothesis: none until the baseline identifies a quantitative bottleneck
 - Decision: no keep/revert decision yet
+- Validation hardening (2026-09-22): comparisons now constrain both throughput and completion
+  rate, stream-event ITL is separated from TPOT, paired scheduler order alternates by repeat, and
+  engine variants record an explicit vLLM restart/cache boundary plus full run provenance.
+- External blocker: this Apple Silicon development host has no NVIDIA GPU, so the real saturation,
+  KV-cache, DCGM, and scheduler evidence sequence in `README.md` remains pending on a GPU host.
 
 Each future loop records one baseline or candidate, one bottleneck, one hypothesis, one changed
 variable, repeated confidence intervals, and a keep/revert/inconclusive decision.
@@ -29,4 +34,16 @@ variable, repeated confidence intervals, and a keep/revert/inconclusive decision
 - Hypothesis: the controlled policy selector produces paired FIFO/SLO artifacts and restores safely
 - Variable changed: scheduling policy (three paired repeats at concurrency 4)
 - Result: comparison artifact generated; mock evidence is explicitly excluded from optimization claims
+- Decision: inconclusive
+## mock-saturation — 2026-09-22T16:16:41+00:00
+
+- Bottleneck: saturation not observed through concurrency 4
+- Hypothesis: queue, KV, and GPU telemetry at the transition identify the limiting resource
+- Variable changed: concurrency
+- Decision: inconclusive
+## mock-scheduler — 2026-09-22T16:17:06+00:00
+
+- Bottleneck: one or more policies produced no successful first token
+- Hypothesis: SLO admission reduces p95 TTFT with at least 95% FIFO throughput
+- Variable changed: scheduling policy
 - Decision: inconclusive

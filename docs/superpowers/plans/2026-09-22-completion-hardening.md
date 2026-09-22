@@ -86,10 +86,10 @@
 - Consumes: Compose services, Make targets, machine-readable outputs, report evidence gates, and the public results API.
 - Produces: a reproducible non-GPU acceptance path and a precise GPU-run checklist.
 
-- [ ] **Step 1: Add deployment contract assertions** for rejection-proof comparison fields, TPOT output, provenance, and the three required graph paths.
-- [ ] **Step 2: Run the contract test** and verify missing deliverables fail.
-- [ ] **Step 3: Update operator documentation and state ledger** with the exact real-GPU command order and remaining external blocker.
-- [ ] **Step 4: Run `.venv/bin/pytest -q`, `.venv/bin/ruff check src tests`, `docker compose config --quiet`, `make report`, and a rebuilt `make smoke`.**
+- [x] **Step 1: Add deployment contract assertions** for rejection-proof comparison fields, TPOT output, provenance, and the three required graph paths.
+- [x] **Step 2: Run the contract test** and verify missing deliverables fail.
+- [x] **Step 3: Update operator documentation and state ledger** with the exact real-GPU command order and remaining external blocker.
+- [x] **Step 4: Run `.venv/bin/pytest -q`, `.venv/bin/ruff check src tests`, `docker compose config --quiet`, `make report`, and a rebuilt `make smoke`.**
 - [ ] **Step 5: Request read-only code review, resolve critical/important findings, commit, push to GitHub, and stop all local containers.**
 
 ## Self-Review

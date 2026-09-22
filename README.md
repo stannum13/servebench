@@ -89,13 +89,18 @@ paired with a fresh repeated baseline, changes one setting, writes confidence in
 - `mixed`: deterministic weighted sampling of all workload classes.
 
 Seeds are isolated from global random state. The load generator uses vLLM `/tokenize` to calibrate
-prompt lengths to the active `MODEL`, and requests token IDs in streaming responses so per-token
-timing is marked valid only when IDs are present. Set `TOKENIZER_URL` if vLLM is on another host.
+prompt lengths to the active `MODEL`, and requests token IDs in streaming responses. ITL is the gap
+between non-empty streamed output events; several token IDs in one event do not create artificial
+zero-duration gaps. TPOT is `(completion time - first-token time) / (output tokens - 1)`. Set
+`TOKENIZER_URL` if vLLM is on another host.
 First sweep concurrency geometrically until throughput flattens and p95 TTFT turns sharply, then
 refine around that transition. If no transition is measured, the report says so. Independently vary
 max batched tokens, max sequences, prefix caching, chunked prefill, and BF16 versus AWQ. Run each
 candidate at least three times, bootstrap paired confidence intervals, and keep a scheduler change
-only when p95 TTFT improves while throughput stays at or above 95% of FIFO.
+only when p95 TTFT improves while throughput and completion rate stay at or above 95% of FIFO.
+FIFO and SLO repeats use the same seeds and alternate execution order to reduce warm-cache/order
+bias. Engine candidates restart vLLM before both the fresh baseline and candidate suite; manifests
+record the model, complete engine settings, seed, execution order, and initial cache state.
 
 ## Measurements and raw data
 
@@ -105,13 +110,38 @@ chosen worker; and the router's KV snapshot. Prometheus collects run-level vLLM 
 latency, KV utilization, prefix hits, preemptions, and DCGM GPU utilization, memory, and power where
 available. Client semaphore wait is outside TTFT; router admission time and post-header TTFT are
 separate stages, while vLLM queue/pre-fill histogram means are run-level telemetry. Derived
-summaries include p50/p95/p99 TTFT, inter-token latency, end-to-end latency, request and token
-throughput, rejections, timeouts, and failures. GPU conclusions require verified vLLM and DCGM
-telemetry; mock and incomplete GPU rows cannot support optimization claims.
+summaries include p50/p95/p99 TTFT, stream-event inter-token latency, TPOT, end-to-end latency,
+request and token throughput, rejections, timeouts, and failures. GPU conclusions require verified
+vLLM and DCGM telemetry plus model/cache provenance; mock and incomplete GPU rows cannot support
+optimization claims. A policy cannot win by rejecting hard requests: completion-rate confidence
+intervals are a hard constraint alongside throughput.
 
 Raw runs live under `results/<run-id>/requests.jsonl` and `results/<run-id>/requests.parquet` with a
 `summary.json` and run manifest. Large raw results should be uploaded as release artifacts or object
 storage and linked from the report. `BENCH_STATE.md` is the append-only hypothesis/decision ledger.
+
+## Real-GPU acceptance checklist
+
+Run this sequence on a Linux NVIDIA host after installing Docker, Compose, the NVIDIA Container
+Toolkit, and `uv`. It is the remaining evidence step; the committed mock data only validates the
+pipeline.
+
+```bash
+nvidia-smi
+export MODEL=Qwen/Qwen2.5-7B-Instruct
+docker compose up --build -d --wait
+make sweep
+cat results/baseline-saturation/transition.json
+make engine-sweep SATURATION_CONCURRENCY=<measured transition concurrency>
+make compare
+make report
+docker compose --profile tools down
+```
+
+Before accepting a result, confirm every candidate has at least three repeats, `evidence_kind` is
+`gpu`, no required telemetry field is null, the comparison includes throughput and completion-rate
+confidence intervals, and `REPORT.md` names the quantitative saturation bottleneck. Configure
+`GPU_HOURLY_COST_USD` when generating the report to include cost per million output tokens.
 
 ## Key output graphs
 
