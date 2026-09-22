@@ -24,5 +24,4 @@ experiments:
   repeats: 3
   warmup_requests: 8
   throughput_floor_ratio: 0.95
-  completion_floor_ratio: 1.0
   confidence_level: 0.95

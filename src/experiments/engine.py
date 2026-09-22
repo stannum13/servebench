@@ -60,6 +60,11 @@ def engine_evidence_verified(
 ) -> bool:
     return all(
         row.get("evidence_kind") == "gpu" and row.get("p95_ttft_ms") is not None
+        and int(row.get("requests", 0)) > 0
+        and int(row.get("successful", -1)) == int(row["requests"])
+        and all(int(row.get(field, -1)) == 0 for field in (
+            "rejections", "timeouts", "failures",
+        ))
         for row in baseline_rows + variant_rows
     )
 

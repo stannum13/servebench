@@ -8,7 +8,6 @@ concurrency:
   coarse: [8]
 objective: p95_ttft_ms
 throughput_floor_ratio: 0.95
-completion_floor_ratio: 1.0
 max_policy_iterations: 3
 cache_isolation: paired-alternating-shared-engine
 cache_state_initial: warm-or-unknown

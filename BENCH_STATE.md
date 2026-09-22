@@ -4,8 +4,8 @@
 
 - Phase: backend smoke verified; GPU baseline pending
 - Latest run: `results/smoke/requests.jsonl` (mock backend, 8/8 successful)
-- Smoke observation (2026-09-22): p95 TTFT 28.95 ms, p95 stream-event ITL 2.81 ms,
-  p95 TPOT 2.06 ms, p95 router admission 0.60 ms, and p95 post-header TTFT 21.05 ms.
+- Smoke observation (2026-09-22): p95 TTFT 31.44 ms, p95 stream-event ITL 2.92 ms,
+  p95 TPOT 2.11 ms, p95 router admission 0.37 ms, and p95 post-header TTFT 23.36 ms.
   Eight 256-token prompts produced 128 token IDs each; not GPU evidence.
 - Baseline saturation run: pending NVIDIA GPU environment
 - Current bottleneck: pending measurement

@@ -60,7 +60,6 @@ def compare_policies(
     fifo_throughput: list[float],
     slo_throughput: list[float],
     throughput_floor: float = 0.95,
-    completion_floor: float = 1.0,
     *,
     fifo_completion: list[float] | None = None,
     slo_completion: list[float] | None = None,
@@ -83,14 +82,18 @@ def compare_policies(
         for old, new in zip(fifo_completion, slo_completion, strict=True)
     ]
     completion_ratio = bootstrap_ci(completion_ratios, seed=2)
+    clean_runs = all(value == 1.0 for value in fifo_completion + slo_completion)
     keep = (
         ttft_delta.high < 0
         and throughput_ratio.low >= throughput_floor
-        and completion_ratio.low >= completion_floor
+        and completion_ratio.low >= 1.0
+        and clean_runs
     )
     if keep:
         reason = "TTFT improved within throughput constraint and completion constraint"
-    elif completion_ratio.low < completion_floor:
+    elif not clean_runs:
+        reason = "clean-run completion constraint failed due to rejection, timeout, or failure"
+    elif completion_ratio.low < 1.0:
         reason = "completion-rate constraint failed"
     else:
         reason = "confidence or throughput constraint failed"
@@ -380,7 +383,6 @@ def compare_and_record_policies(
         [float(row["requests_per_second"]) for row in fifo],
         [float(row["requests_per_second"]) for row in slo],
         float(config.get("throughput_floor_ratio", 0.95)),
-        float(config.get("completion_floor_ratio", 1.0)),
         fifo_completion=fifo_completion,
         slo_completion=slo_completion,
     )

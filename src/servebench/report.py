@@ -176,6 +176,7 @@ def generate_report(
     required_gpu_fields = (
         "gpu_utilization_peak", "gpu_memory_peak_mib", "kv_cache_peak",
         "vllm_queue_mean_ms", "vllm_prefill_mean_ms",
+        "requests", "successful", "rejections", "timeouts", "failures",
     )
     required_provenance_fields = (
         "model", "cache_isolation", "cache_state_initial",
@@ -193,6 +194,8 @@ def generate_report(
             and not comparison_frame[field].astype(str).str.lower().eq("unknown").any()
             for field in required_provenance_fields
         )
+        and (comparison_frame["successful"] == comparison_frame["requests"]).all()
+        and (comparison_frame[["rejections", "timeouts", "failures"]] == 0).all().all()
     )
     paired_provenance = True
     if {"fifo", "slo"} <= policy_names:

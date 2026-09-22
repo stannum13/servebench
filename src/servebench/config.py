@@ -66,7 +66,6 @@ class ExperimentConfig(StrictModel):
     repeats: int = Field(default=3, ge=3)
     warmup_requests: int = Field(default=8, ge=0)
     throughput_floor_ratio: float = Field(default=0.95, gt=0, le=1)
-    completion_floor_ratio: float = Field(default=1.0, gt=0, le=1)
     confidence_level: float = Field(default=0.95, gt=0, lt=1)
 
 

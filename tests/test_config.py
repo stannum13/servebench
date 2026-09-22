@@ -10,7 +10,6 @@ def test_default_config_uses_ungated_configurable_model(monkeypatch: pytest.Monk
     monkeypatch.delenv("MODEL", raising=False)
     config = load_config(Path("configs/default.yaml"))
     assert config.model == "Qwen/Qwen2.5-7B-Instruct"
-    assert config.experiments.completion_floor_ratio == 1.0
 
 
 def test_environment_overrides_model_and_backend_url(monkeypatch: pytest.MonkeyPatch) -> None:

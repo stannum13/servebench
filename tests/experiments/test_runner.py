@@ -51,6 +51,17 @@ def test_policy_cannot_win_with_any_completion_rate_regression() -> None:
     assert result.completion_ratio.estimate == 0.96
 
 
+def test_policy_cannot_win_when_both_policies_have_failures() -> None:
+    result = compare_policies(
+        [100, 105, 110], [60, 65, 70],
+        [10, 10, 10], [10, 10, 10],
+        fifo_completion=[0.9, 0.9, 0.9],
+        slo_completion=[0.9, 0.9, 0.9],
+    )
+    assert result.keep is False
+    assert "clean" in result.reason.lower()
+
+
 def test_state_ledger_records_hypothesis_and_decision(tmp_path: Path) -> None:
     path = tmp_path / "BENCH_STATE.md"
     append_state(

@@ -18,6 +18,8 @@ def rows(repeats: int = 3) -> list[dict[str, object]]:
                 "gpu_memory_peak_mib": 20000, "evidence_kind": "gpu",
                 "vllm_queue_mean_ms": 20, "vllm_prefill_mean_ms": 80,
                 "model": "open/model",
+                "requests": 100, "successful": 100, "rejections": 0,
+                "timeouts": 0, "failures": 0,
                 "cache_isolation": "paired-alternating-shared-engine",
                 "cache_state_initial": "warm-or-unknown",
             })
@@ -31,6 +33,8 @@ def rows(repeats: int = 3) -> list[dict[str, object]]:
             "gpu_memory_peak_mib": 20000, "evidence_kind": "gpu",
             "vllm_queue_mean_ms": 15, "vllm_prefill_mean_ms": 70,
             "model": "open/model",
+            "requests": 100, "successful": 100, "rejections": 0,
+            "timeouts": 0, "failures": 0,
             "cache_isolation": "paired-alternating-shared-engine",
             "cache_state_initial": "warm-or-unknown",
         })

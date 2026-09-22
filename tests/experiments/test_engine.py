@@ -92,7 +92,11 @@ def test_engine_variant_suite_requests_actual_served_model(tmp_path: Path, monke
 
 
 def test_engine_candidate_cannot_be_kept_with_missing_gpu_or_first_tokens() -> None:
-    complete = {"evidence_kind": "gpu", "p95_ttft_ms": 100}
+    complete = {
+        "evidence_kind": "gpu", "p95_ttft_ms": 100,
+        "requests": 100, "successful": 100,
+        "rejections": 0, "timeouts": 0, "failures": 0,
+    }
     assert engine_evidence_verified([complete], [complete]) is True
     assert engine_evidence_verified([complete], [{**complete, "evidence_kind": "unknown"}]) is False
     assert engine_evidence_verified([complete], [{**complete, "p95_ttft_ms": None}]) is False
@@ -122,7 +126,9 @@ def test_each_engine_candidate_gets_a_fresh_named_baseline(
         return [
             {
                 "repeat": repeat, "evidence_kind": "gpu", "p95_ttft_ms": 100,
-                "requests_per_second": 10,
+                    "requests_per_second": 10,
+                    "requests": 2, "successful": 2,
+                    "rejections": 0, "timeouts": 0, "failures": 0,
                 "model": "base/model",
                 "cache_isolation": "vllm-restart-before-suite",
                 "cache_state_initial": "cold",
