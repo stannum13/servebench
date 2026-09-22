@@ -54,3 +54,10 @@ variable, repeated confidence intervals, and a keep/revert/inconclusive decision
 - Variable changed: scheduling policy
 - Measurement: p95 TTFT delta: -8.50 ms, 95% CI [-29.04, 3.07] ms; throughput ratio: 0.987, 95% CI [0.866, 1.100]; completion ratio: 1.000, 95% CI [1.000, 1.000]
 - Decision: inconclusive
+## mock-scheduler — 2026-09-22T16:42:14+00:00
+
+- Bottleneck: mixed-workload p95 TTFT at saturation
+- Hypothesis: SLO admission reduces p95 TTFT while preserving 95% of FIFO throughput and not reducing completion rate
+- Variable changed: scheduling policy
+- Measurement: p95 TTFT delta: 0.05 ms, 95% CI [-3.14, 1.98] ms; throughput ratio: 0.993, 95% CI [0.959, 1.035]; completion ratio: 1.000, 95% CI [1.000, 1.000]
+- Decision: inconclusive

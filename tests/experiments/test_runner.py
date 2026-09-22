@@ -301,6 +301,27 @@ def test_mock_policy_artifact_cannot_serialize_keep_true(tmp_path: Path, monkeyp
     assert comparison["keep"] is False
 
 
+def test_inconsistent_gpu_counters_cannot_serialize_keep_true(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr("experiments.runner.append_state", lambda *args, **kwargs: None)
+    rows = []
+    for repeat in range(3):
+        for policy, ttft in (("fifo", 100), ("slo", 50)):
+            rows.append({
+                "policy": policy, "concurrency": 8, "repeat": repeat,
+                "p95_ttft_ms": ttft, "requests_per_second": 10,
+                "requests": 100, "successful": 100,
+                "rejections": int(policy == "slo"), "timeouts": 0, "failures": 0,
+            })
+    compare_and_record_policies({"name": "scheduler"}, rows, tmp_path, "gpu")
+    import json
+    comparison = json.loads((tmp_path / "comparison.json").read_text())
+    assert comparison["statistical_keep"] is True
+    assert comparison["clean_runs"] is False
+    assert comparison["keep"] is False
+
+
 def test_policy_artifact_records_completion_and_rejection_evidence(
     tmp_path: Path, monkeypatch
 ) -> None:

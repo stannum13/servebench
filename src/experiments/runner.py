@@ -386,9 +386,20 @@ def compare_and_record_policies(
         fifo_completion=fifo_completion,
         slo_completion=slo_completion,
     )
+    clean_runs = all(
+        int(row.get("requests", 0)) > 0
+        and int(row.get("successful", -1)) == int(row["requests"])
+        and all(int(row.get(field, -1)) == 0 for field in (
+            "rejections", "timeouts", "failures",
+        ))
+        for row in fifo + slo
+    )
     comparison_payload = comparison_as_dict(comparison)
     comparison_payload["statistical_keep"] = comparison.keep
-    comparison_payload["keep"] = comparison.keep and evidence_kind == "gpu"
+    comparison_payload["clean_runs"] = clean_runs
+    comparison_payload["keep"] = (
+        comparison.keep and evidence_kind == "gpu" and clean_runs
+    )
     (suite_dir / "comparison.json").write_text(
         json.dumps({
             **comparison_payload,
@@ -397,7 +408,7 @@ def compare_and_record_policies(
         }, indent=2) + "\n",
         encoding="utf-8",
     )
-    decision = "keep" if comparison.keep else "revert"
+    decision = "keep" if comparison.keep and clean_runs else "revert"
     if evidence_kind != "gpu":
         decision = "inconclusive"
     append_state(

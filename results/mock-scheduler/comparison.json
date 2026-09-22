@@ -1,15 +1,15 @@
 {
   "keep": false,
   "ttft_delta_ms": {
-    "estimate": -8.501666,
-    "low": -29.037146,
-    "high": 3.072554,
+    "estimate": 0.05381575000000005,
+    "low": -3.138615,
+    "high": 1.980216,
     "confidence": 0.95
   },
   "throughput_ratio": {
-    "estimate": 0.9872802549776802,
-    "low": 0.865921,
-    "high": 1.099857,
+    "estimate": 0.992791212419313,
+    "low": 0.959483,
+    "high": 1.035476,
     "confidence": 0.95
   },
   "completion_ratio": {
@@ -20,6 +20,7 @@
   },
   "reason": "confidence or throughput constraint failed",
   "statistical_keep": false,
+  "clean_runs": true,
   "policy_totals": {
     "fifo": {
       "requests": 48,

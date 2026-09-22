@@ -5,49 +5,49 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.8011007499881089,
-    "requests_per_second": 14.979389296762138,
-    "input_tokens_per_second": 23008.341959826645,
-    "output_tokens_per_second": 1917.3618299855536,
+    "duration_seconds": 0.8665877911262214,
+    "requests_per_second": 13.847414102620515,
+    "input_tokens_per_second": 21269.628061625113,
+    "output_tokens_per_second": 1772.469005135426,
     "ttft_ms": {
-      "p50": 10.483521,
-      "p95": 14.749412,
-      "p99": 15.995749
+      "p50": 13.780104,
+      "p95": 17.57065,
+      "p99": 19.175697
     },
     "inter_token_latency_ms": {
-      "p50": 1.989063,
-      "p95": 2.633297,
-      "p99": 3.220452
+      "p50": 2.074063,
+      "p95": 3.538596,
+      "p99": 4.474253
     },
     "tpot_ms": {
-      "p50": 2.01365,
-      "p95": 2.027179,
-      "p99": 2.02791
+      "p50": 2.141294,
+      "p95": 2.247622,
+      "p99": 2.256564
     },
     "e2e_latency_ms": {
-      "p50": 265.603958,
-      "p95": 271.263079,
-      "p99": 271.478716
+      "p50": 282.308646,
+      "p95": 303.276727,
+      "p99": 303.746079
     },
     "queue_time_ms": {
-      "p50": 270.728125,
-      "p95": 535.597335,
-      "p99": 536.117067
+      "p50": 281.422875,
+      "p95": 566.005177,
+      "p99": 568.170068
     },
     "client_queue_time_ms": {
-      "p50": 270.728125,
-      "p95": 535.597335,
-      "p99": 536.117067
+      "p50": 281.422875,
+      "p95": 566.005177,
+      "p99": 568.170068
     },
     "router_admission_ms": {
-      "p50": 0.577208,
-      "p95": 2.746669,
-      "p99": 3.722167
+      "p50": 0.537125,
+      "p95": 1.760016,
+      "p99": 2.145603
     },
     "post_header_ttft_ms": {
-      "p50": 4.162042,
-      "p95": 5.247056,
-      "p99": 5.360411
+      "p50": 5.385375,
+      "p95": 8.10911,
+      "p99": 8.686188
     },
     "kv_cache_peak": 0.0,
     "preemptions": null,
@@ -72,7 +72,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 0,
-    "p95_ttft_ms": 14.749412,
+    "p95_ttft_ms": 17.57065,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -82,49 +82,49 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.9756933329626918,
-    "requests_per_second": 12.298946394931297,
-    "input_tokens_per_second": 18891.181662614472,
-    "output_tokens_per_second": 1574.265138551206,
+    "duration_seconds": 0.8765869997441769,
+    "requests_per_second": 13.68945695464578,
+    "input_tokens_per_second": 21027.005882335918,
+    "output_tokens_per_second": 1752.2504901946597,
     "ttft_ms": {
-      "p50": 10.234834,
-      "p95": 14.300196,
-      "p99": 14.587039
+      "p50": 11.934417,
+      "p95": 18.621152,
+      "p99": 18.75273
     },
     "inter_token_latency_ms": {
-      "p50": 1.991334,
-      "p95": 2.946683,
-      "p99": 21.301609
+      "p50": 2.148313,
+      "p95": 3.364606,
+      "p99": 3.946938
     },
     "tpot_ms": {
-      "p50": 2.054473,
-      "p95": 3.330055,
-      "p99": 3.334901
+      "p50": 2.190345,
+      "p95": 2.31874,
+      "p99": 2.320315
     },
     "e2e_latency_ms": {
-      "p50": 269.087417,
-      "p95": 436.112143,
-      "p99": 436.723761
+      "p50": 294.955708,
+      "p95": 302.125142,
+      "p99": 302.601295
     },
     "queue_time_ms": {
-      "p50": 267.807792,
-      "p95": 539.092461,
-      "p99": 539.362126
+      "p50": 295.886,
+      "p95": 599.604287,
+      "p99": 600.01719
     },
     "client_queue_time_ms": {
-      "p50": 267.807792,
-      "p95": 539.092461,
-      "p99": 539.362126
+      "p50": 295.886,
+      "p95": 599.604287,
+      "p99": 600.01719
     },
     "router_admission_ms": {
-      "p50": 0.533084,
-      "p95": 1.477489,
-      "p99": 1.631398
+      "p50": 0.262958,
+      "p95": 1.129223,
+      "p99": 1.339745
     },
     "post_header_ttft_ms": {
-      "p50": 3.03623,
-      "p95": 5.892678,
-      "p99": 7.353569
+      "p50": 4.756604,
+      "p95": 7.019616,
+      "p99": 7.727723
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -149,7 +149,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 1,
-    "p95_ttft_ms": 14.300196,
+    "p95_ttft_ms": 18.621152,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -159,49 +159,49 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.7999989171512425,
-    "requests_per_second": 15.000020303441685,
-    "input_tokens_per_second": 23040.031186086428,
-    "output_tokens_per_second": 1920.0025988405357,
+    "duration_seconds": 0.8653013752773404,
+    "requests_per_second": 13.868000609791984,
+    "input_tokens_per_second": 21301.248936640488,
+    "output_tokens_per_second": 1775.104078053374,
     "ttft_ms": {
-      "p50": 8.271229,
-      "p95": 16.543877,
-      "p99": 16.931975
+      "p50": 11.033125,
+      "p95": 17.255369,
+      "p99": 17.992974
     },
     "inter_token_latency_ms": {
-      "p50": 1.998146,
-      "p95": 2.625046,
-      "p99": 3.058003
+      "p50": 2.061625,
+      "p95": 3.421819,
+      "p99": 4.077756
     },
     "tpot_ms": {
-      "p50": 1.999261,
-      "p95": 2.012403,
-      "p99": 2.014485
+      "p50": 2.222129,
+      "p95": 2.248682,
+      "p99": 2.257844
     },
     "e2e_latency_ms": {
-      "p50": 263.286354,
-      "p95": 272.179104,
-      "p99": 272.302854
+      "p50": 290.983999,
+      "p95": 297.122462,
+      "p99": 298.361759
     },
     "queue_time_ms": {
-      "p50": 271.688438,
-      "p95": 536.325527,
-      "p99": 537.155605
+      "p50": 272.309708,
+      "p95": 566.365242,
+      "p99": 566.576882
     },
     "client_queue_time_ms": {
-      "p50": 271.688438,
-      "p95": 536.325527,
-      "p99": 537.155605
+      "p50": 272.309708,
+      "p95": 566.365242,
+      "p99": 566.576882
     },
     "router_admission_ms": {
-      "p50": 0.294604,
-      "p95": 2.384644,
-      "p99": 2.859129
+      "p50": 0.391979,
+      "p95": 0.807406,
+      "p99": 0.846181
     },
     "post_header_ttft_ms": {
-      "p50": 3.743334,
-      "p95": 5.585802,
-      "p99": 5.683793
+      "p50": 3.959437,
+      "p95": 5.884287,
+      "p99": 5.98479
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -226,7 +226,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 2,
-    "p95_ttft_ms": 16.543877,
+    "p95_ttft_ms": 17.255369,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -236,51 +236,51 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.7930068750865757,
-    "requests_per_second": 15.132277382450072,
-    "input_tokens_per_second": 23243.17805944331,
-    "output_tokens_per_second": 1936.9315049536092,
+    "duration_seconds": 0.846469874959439,
+    "requests_per_second": 14.176523412100181,
+    "input_tokens_per_second": 21775.139960985878,
+    "output_tokens_per_second": 1814.5949967488232,
     "ttft_ms": {
-      "p50": 9.098229,
-      "p95": 13.584794,
-      "p99": 13.605125
+      "p50": 15.126208,
+      "p95": 22.05104,
+      "p99": 22.366942
     },
     "inter_token_latency_ms": {
-      "p50": 1.987396,
-      "p95": 2.602592,
-      "p99": 3.042948
+      "p50": 2.043624,
+      "p95": 3.139898,
+      "p99": 3.733585
     },
     "tpot_ms": {
-      "p50": 1.994957,
-      "p95": 2.015585,
-      "p99": 2.020157
+      "p50": 2.082316,
+      "p95": 2.191984,
+      "p99": 2.201142
     },
     "e2e_latency_ms": {
-      "p50": 263.799042,
-      "p95": 267.6082,
-      "p99": 267.857606
+      "p50": 277.598458,
+      "p95": 292.305498,
+      "p99": 292.853133
     },
     "queue_time_ms": {
-      "p50": 267.962771,
-      "p95": 533.902058,
-      "p99": 534.501045
+      "p50": 279.038166,
+      "p95": 573.403222,
+      "p99": 573.773977
     },
     "client_queue_time_ms": {
-      "p50": 267.962771,
-      "p95": 533.902058,
-      "p99": 534.501045
+      "p50": 279.038166,
+      "p95": 573.403222,
+      "p99": 573.773977
     },
     "router_admission_ms": {
-      "p50": 0.347042,
-      "p95": 1.079894,
-      "p99": 1.222179
+      "p50": 0.239021,
+      "p95": 1.270527,
+      "p99": 1.310439
     },
     "post_header_ttft_ms": {
-      "p50": 3.811521,
-      "p95": 5.971095,
-      "p99": 6.359286
+      "p50": 4.21525,
+      "p95": 6.251435,
+      "p99": 6.509587
     },
-    "kv_cache_peak": 0.0,
+    "kv_cache_peak": null,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
@@ -303,7 +303,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 3,
-    "p95_ttft_ms": 13.584794,
+    "p95_ttft_ms": 22.05104,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -313,51 +313,51 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.7988020828925073,
-    "requests_per_second": 15.022494629141832,
-    "input_tokens_per_second": 23074.551750361854,
-    "output_tokens_per_second": 1922.8793125301545,
+    "duration_seconds": 0.8735496248118579,
+    "requests_per_second": 13.737055868559864,
+    "input_tokens_per_second": 21100.11781410795,
+    "output_tokens_per_second": 1758.3431511756626,
     "ttft_ms": {
-      "p50": 10.649625,
-      "p95": 13.707431,
-      "p99": 13.801719
+      "p50": 13.883437,
+      "p95": 15.250723,
+      "p99": 15.544477
     },
     "inter_token_latency_ms": {
-      "p50": 1.982229,
-      "p95": 2.550327,
-      "p99": 3.019392
+      "p50": 2.059375,
+      "p95": 3.777165,
+      "p99": 5.166968
     },
     "tpot_ms": {
-      "p50": 1.992685,
-      "p95": 2.032797,
-      "p99": 2.034711
+      "p50": 2.175664,
+      "p95": 2.256762,
+      "p99": 2.258941
     },
     "e2e_latency_ms": {
-      "p50": 263.722083,
-      "p95": 270.372306,
-      "p99": 271.738561
+      "p50": 289.803437,
+      "p95": 298.295403,
+      "p99": 298.726548
     },
     "queue_time_ms": {
-      "p50": 270.134021,
-      "p95": 536.061181,
-      "p99": 537.048303
+      "p50": 282.564104,
+      "p95": 574.959416,
+      "p99": 575.198116
     },
     "client_queue_time_ms": {
-      "p50": 270.134021,
-      "p95": 536.061181,
-      "p99": 537.048303
+      "p50": 282.564104,
+      "p95": 574.959416,
+      "p99": 575.198116
     },
     "router_admission_ms": {
-      "p50": 0.357291,
-      "p95": 1.792683,
-      "p99": 1.800603
+      "p50": 0.331229,
+      "p95": 2.350816,
+      "p99": 2.403397
     },
     "post_header_ttft_ms": {
-      "p50": 3.346458,
-      "p95": 5.174148,
-      "p99": 5.51953
+      "p50": 5.031166,
+      "p95": 6.41584,
+      "p99": 6.436868
     },
-    "kv_cache_peak": null,
+    "kv_cache_peak": 0.0,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
@@ -380,7 +380,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 4,
-    "p95_ttft_ms": 13.707431,
+    "p95_ttft_ms": 15.250723,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -390,49 +390,49 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.7982060839422047,
-    "requests_per_second": 15.033711520631403,
-    "input_tokens_per_second": 23091.780895689837,
-    "output_tokens_per_second": 1924.3150746408196,
+    "duration_seconds": 0.8283579577691853,
+    "requests_per_second": 14.486490879277211,
+    "input_tokens_per_second": 22251.249990569795,
+    "output_tokens_per_second": 1854.270832547483,
     "ttft_ms": {
-      "p50": 10.092396,
-      "p95": 16.893456,
-      "p99": 18.572258
+      "p50": 12.082604,
+      "p95": 17.083275,
+      "p99": 17.514988
     },
     "inter_token_latency_ms": {
-      "p50": 1.987834,
-      "p95": 2.702946,
-      "p99": 3.755037
+      "p50": 2.034896,
+      "p95": 3.138281,
+      "p99": 3.881467
     },
     "tpot_ms": {
-      "p50": 1.988583,
-      "p95": 2.016536,
-      "p99": 2.018079
+      "p50": 2.064342,
+      "p95": 2.14297,
+      "p99": 2.143424
     },
     "e2e_latency_ms": {
-      "p50": 261.609521,
-      "p95": 272.714806,
-      "p99": 273.881594
+      "p50": 269.851917,
+      "p95": 288.174671,
+      "p99": 288.202134
     },
     "queue_time_ms": {
-      "p50": 272.825876,
-      "p95": 536.332592,
-      "p99": 536.566818
+      "p50": 289.384395,
+      "p95": 559.151248,
+      "p99": 559.540116
     },
     "client_queue_time_ms": {
-      "p50": 272.825876,
-      "p95": 536.332592,
-      "p99": 536.566818
+      "p50": 289.384395,
+      "p95": 559.151248,
+      "p99": 559.540116
     },
     "router_admission_ms": {
-      "p50": 0.177355,
-      "p95": 2.884394,
-      "p99": 3.086446
+      "p50": 0.197209,
+      "p95": 2.407608,
+      "p99": 3.089022
     },
     "post_header_ttft_ms": {
-      "p50": 3.670521,
-      "p95": 5.85191,
-      "p99": 6.178115
+      "p50": 3.129417,
+      "p95": 5.314373,
+      "p99": 5.380575
     },
     "kv_cache_peak": null,
     "preemptions": null,
@@ -457,7 +457,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 5,
-    "p95_ttft_ms": 16.893456,
+    "p95_ttft_ms": 17.083275,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -467,51 +467,51 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.8112853327766061,
-    "requests_per_second": 14.791343458571186,
-    "input_tokens_per_second": 22719.503552365342,
-    "output_tokens_per_second": 1893.2919626971118,
+    "duration_seconds": 0.8552845418453217,
+    "requests_per_second": 14.030418431402214,
+    "input_tokens_per_second": 21550.722710633803,
+    "output_tokens_per_second": 1795.8935592194834,
     "ttft_ms": {
-      "p50": 9.795687,
-      "p95": 18.607796,
-      "p99": 18.880926
+      "p50": 12.266063,
+      "p95": 19.534982,
+      "p99": 19.687864
     },
     "inter_token_latency_ms": {
-      "p50": 1.997854,
-      "p95": 3.015783,
-      "p99": 3.904407
+      "p50": 2.090041,
+      "p95": 3.420952,
+      "p99": 3.9722
     },
     "tpot_ms": {
-      "p50": 2.017434,
-      "p95": 2.058846,
-      "p99": 2.06556
+      "p50": 2.181048,
+      "p95": 2.191966,
+      "p99": 2.192191
     },
     "e2e_latency_ms": {
-      "p50": 268.999834,
-      "p95": 273.795121,
-      "p99": 274.674424
+      "p50": 289.613479,
+      "p95": 297.43808,
+      "p99": 297.948883
     },
     "queue_time_ms": {
-      "p50": 273.35425,
-      "p95": 539.383392,
-      "p99": 540.029312
+      "p50": 298.17475,
+      "p95": 590.533357,
+      "p99": 590.812739
     },
     "client_queue_time_ms": {
-      "p50": 273.35425,
-      "p95": 539.383392,
-      "p99": 540.029312
+      "p50": 298.17475,
+      "p95": 590.533357,
+      "p99": 590.812739
     },
     "router_admission_ms": {
-      "p50": 0.560542,
-      "p95": 2.158685,
-      "p99": 2.358903
+      "p50": 0.285,
+      "p95": 1.035086,
+      "p99": 1.036351
     },
     "post_header_ttft_ms": {
-      "p50": 4.836105,
-      "p95": 6.452975,
-      "p99": 6.591795
+      "p50": 4.147479,
+      "p95": 6.332017,
+      "p99": 6.515203
     },
-    "kv_cache_peak": 0.0,
+    "kv_cache_peak": null,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
@@ -534,7 +534,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 6,
-    "p95_ttft_ms": 18.607796,
+    "p95_ttft_ms": 19.534982,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   },
@@ -544,51 +544,51 @@
     "failures": 0,
     "timeouts": 0,
     "rejections": 0,
-    "duration_seconds": 0.9216659590601921,
-    "requests_per_second": 13.019901496889617,
-    "input_tokens_per_second": 19998.56869922245,
-    "output_tokens_per_second": 1666.547391601871,
+    "duration_seconds": 0.8123313337564468,
+    "requests_per_second": 14.772297338954845,
+    "input_tokens_per_second": 22690.248712634642,
+    "output_tokens_per_second": 1890.8540593862201,
     "ttft_ms": {
-      "p50": 14.788771,
-      "p95": 58.310352,
-      "p99": 69.56117
+      "p50": 9.955813,
+      "p95": 17.407102,
+      "p99": 18.220387
     },
     "inter_token_latency_ms": {
-      "p50": 1.983708,
-      "p95": 2.784498,
-      "p99": 12.038956
+      "p50": 2.003458,
+      "p95": 3.177497,
+      "p99": 4.109765
     },
     "tpot_ms": {
-      "p50": 2.032019,
-      "p95": 2.718327,
-      "p99": 2.776313
+      "p50": 1.994225,
+      "p95": 2.105549,
+      "p99": 2.106988
     },
     "e2e_latency_ms": {
-      "p50": 270.504354,
-      "p95": 377.79439,
-      "p99": 379.660045
+      "p50": 268.649063,
+      "p95": 276.058482,
+      "p99": 276.103564
     },
     "queue_time_ms": {
-      "p50": 271.875458,
-      "p95": 540.766659,
-      "p99": 541.384932
+      "p50": 270.832876,
+      "p95": 535.483556,
+      "p99": 536.069911
     },
     "client_queue_time_ms": {
-      "p50": 271.875458,
-      "p95": 540.766659,
-      "p99": 541.384932
+      "p50": 270.832876,
+      "p95": 535.483556,
+      "p99": 536.069911
     },
     "router_admission_ms": {
-      "p50": 0.264605,
-      "p95": 2.210566,
-      "p99": 2.40688
+      "p50": 0.452146,
+      "p95": 1.69814,
+      "p99": 2.267628
     },
     "post_header_ttft_ms": {
-      "p50": 4.496292,
-      "p95": 35.423298,
-      "p99": 35.745726
+      "p50": 3.990896,
+      "p95": 5.943937,
+      "p99": 6.120488
     },
-    "kv_cache_peak": null,
+    "kv_cache_peak": 0.0,
     "preemptions": null,
     "prefix_cache_hit_rate": null,
     "gpu_utilization_peak": null,
@@ -611,7 +611,7 @@
     "cache_isolation": "paired-alternating-shared-engine",
     "cache_state_initial": "warm-or-unknown",
     "execution_order": 7,
-    "p95_ttft_ms": 58.310352,
+    "p95_ttft_ms": 17.407102,
     "evidence_kind": "mock",
     "evidence_requested": "mock"
   }

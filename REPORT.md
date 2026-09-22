@@ -6,8 +6,8 @@
 
 | policy | p95 TTFT ms (95% CI) | requests/s (95% CI) | completion % | rejection % | power (W) | $ / 1M output tokens |
 |---|---:|---:|---:|---:|---:|---:|
-| fifo | 25.09 [13.65, 47.16] | 14.54 [13.52, 15.09] | 100.00 | 0.00 | unavailable | not configured |
-| slo | 16.59 [14.95, 18.09] | 14.28 [12.97, 15.02] | 100.00 | 0.00 | unavailable | not configured |
+| fifo | 18.07 [15.83, 20.89] | 14.13 [13.79, 14.54] | 100.00 | 0.00 | unavailable | not configured |
+| slo | 18.12 [17.17, 19.08] | 14.02 [13.73, 14.33] | 100.00 | 0.00 | unavailable | not configured |
 
 Mock evidence only: repeated measurements exist, but no optimization claim is made.
 
